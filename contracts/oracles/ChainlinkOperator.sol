@@ -12,7 +12,7 @@ import "@paulrberg/contracts/token/erc20/Erc20Interface.sol";
  */
 // TODO: to be tested
 contract ChainlinkOperator is IChainlinkOperator {
-    mapping(string => Feed) private  _feeds;
+    mapping(string => Feed) private _feeds;
     address private _owner;
 
     modifier onlyOwner() {
@@ -30,10 +30,10 @@ contract ChainlinkOperator is IChainlinkOperator {
     }
 
     /// @inheritdoc IChainlinkOperator
-    function price(string memory symbol) external override feedExists(_feeds[symbol].id) view returns (uint256) {
+    function price(string memory symbol) external view override feedExists(_feeds[symbol].id) returns (uint256) {
         require(!_feeds[symbol].disabled, "ChainlinkOperator: price feed is disabled for symbol");
 
-        (, int256 answer, , ,) = IAggregatorV3(_feeds[symbol].id).latestRoundData();
+        (, int256 answer, , , ) = IAggregatorV3(_feeds[symbol].id).latestRoundData();
         return uint256(answer);
     }
 
@@ -42,15 +42,11 @@ contract ChainlinkOperator is IChainlinkOperator {
         uint8 decimals = feed.decimals();
         require(decimals == 8, "ChainlinkOperator: non-USD price feed");
 
-        _feeds[asset.symbol()] = Feed(
-            address(feed),
-            address(asset),
-            false
-        );
+        _feeds[asset.symbol()] = Feed(address(feed), address(asset), false);
     }
 
     /// @inheritdoc IChainlinkOperator
-    function getFeed(string memory symbol) external override view returns (Feed memory) {
+    function getFeed(string memory symbol) external view override returns (Feed memory) {
         return _feeds[symbol];
     }
 

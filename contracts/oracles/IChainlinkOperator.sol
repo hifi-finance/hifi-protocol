@@ -12,9 +12,9 @@ import "@paulrberg/contracts/token/erc20/Erc20Interface.sol";
  */
 interface IChainlinkOperator {
     struct Feed {
-        address id;     // Chainlink price feed contract address
-        address asset;  // contract address of token that price feed is tracking value of
-        bool disabled;  // false by default
+        address id; // Chainlink price feed contract address
+        address asset; // contract address of token that price feed is tracking value of
+        bool disabled; // false by default
     }
 
     /**

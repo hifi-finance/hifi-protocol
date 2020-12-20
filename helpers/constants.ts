@@ -13,7 +13,9 @@ export const tenMillion: BigNumber = ten.pow(7);
 export const fiftyMillion: BigNumber = tenMillion.mul(50);
 export const defaultNumberOfDecimals: BigNumber = BigNumber.from(18);
 export const chainlinkPriceFeedPrecision: BigNumber = BigNumber.from(8);
-export const chainlinkPriceFeedPrecisionScalar: BigNumber = ten.pow(defaultNumberOfDecimals.sub(chainlinkPriceFeedPrecision));
+export const chainlinkPriceFeedPrecisionScalar: BigNumber = ten.pow(
+  defaultNumberOfDecimals.sub(chainlinkPriceFeedPrecision),
+);
 
 /* Represented as mantissas (decimal scalars with 18 decimals). */
 export const percentages: { [name: string]: BigNumber } = {

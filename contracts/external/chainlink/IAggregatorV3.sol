@@ -1,6 +1,5 @@
 pragma solidity ^0.7.0;
 
-
 /**
  * @dev `AggregatorV3Interface` by Chainlink
  * @dev Source: https://docs.chain.link/docs/price-feeds-api-reference
@@ -37,13 +36,16 @@ interface IAggregatorV3 {
      * @return answeredInRound The round ID of the round in which the answer was computed
      * (Only some AggregatorV3Interface implementations return meaningful values)
      */
-    function getRoundData(uint80 _roundId) external view returns (
-        uint80 roundId,
-        int256 answer,
-        uint256 startedAt,
-        uint256 updatedAt,
-        uint80 answeredInRound
-    );
+    function getRoundData(uint80 _roundId)
+        external
+        view
+        returns (
+            uint80 roundId,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        );
 
     /**
      * @dev Get data from the last round
@@ -54,11 +56,14 @@ interface IAggregatorV3 {
      * @return updatedAt Timestamp of when the round was updated
      * @return answeredInRound The round ID of the round in which the answer was computed
      */
-    function latestRoundData() external view returns (
-        uint80 roundId,
-        int256 answer,
-        uint256 startedAt,
-        uint256 updatedAt,
-        uint80 answeredInRound
-    );
+    function latestRoundData()
+        external
+        view
+        returns (
+            uint80 roundId,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        );
 }
