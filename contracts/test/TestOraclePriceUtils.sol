@@ -3,7 +3,7 @@ pragma solidity ^0.7.0;
 
 import "@paulrberg/contracts/math/CarefulMath.sol";
 import "../oracles/OraclePriceUtils.sol";
-import "../oracles/IChainlinkOperator.sol";
+import "../oracles/ChainlinkOperatorInterface.sol";
 
 /**
  * @title TestOraclePriceUtils
@@ -11,11 +11,11 @@ import "../oracles/IChainlinkOperator.sol";
  * @dev Strictly for test purposes. Do not use in production.
  */
 contract TestOraclePriceUtils {
-    using OraclePriceUtils for IChainlinkOperator;
+    using OraclePriceUtils for ChainlinkOperatorInterface;
 
-    IChainlinkOperator public oracle;
+    ChainlinkOperatorInterface public oracle;
 
-    constructor(IChainlinkOperator oracle_) {
+    constructor(ChainlinkOperatorInterface oracle_) {
         oracle = oracle_;
     }
 

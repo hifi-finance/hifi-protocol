@@ -6,11 +6,10 @@ import "../external/chainlink/IAggregatorV3.sol";
 import "@paulrberg/contracts/token/erc20/Erc20Interface.sol";
 
 /**
- * @title IChainlinkOperator
+ * @title ChainlinkOperatorInterface
  * @author Mainframe
- * @notice Interface mainframe's Chainlink pricefeed operator.
  */
-interface IChainlinkOperator {
+interface ChainlinkOperatorInterface {
     struct Feed {
         address id; // Chainlink price feed contract address
         address asset; // contract address of token that price feed is tracking value of

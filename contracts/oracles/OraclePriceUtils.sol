@@ -2,7 +2,7 @@
 pragma solidity ^0.7.0;
 
 import "@paulrberg/contracts/math/CarefulMath.sol";
-import "./IChainlinkOperator.sol";
+import "./ChainlinkOperatorInterface.sol";
 
 /**
  * @title OraclePriceUtils
@@ -25,7 +25,7 @@ library OraclePriceUtils {
      * @return The upscaled price as a mantissa.
      */
     function getAdjustedPrice(
-        IChainlinkOperator oracle,
+        ChainlinkOperatorInterface oracle,
         string memory symbol,
         uint256 precisionScalar
     ) internal view returns (MathError, uint256) {
