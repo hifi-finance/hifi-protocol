@@ -8,7 +8,7 @@ import "../oracles/IChainlinkOperator.sol";
  * @author Mainframe
  * @dev Strictly for testing purposes. Do not use in production.
  */
-contract SimpleUniswapAnchoredView is IChainlinkOperator {
+contract SimpleUniswapAnchoredView {
     uint256 public daiPrice;
     uint256 public wethPrice;
 
@@ -29,7 +29,7 @@ contract SimpleUniswapAnchoredView is IChainlinkOperator {
      * @notice Prices are returned in the format that the Chainlink USD price feeds use, i.e. 8 decimals of precision.
      * @dev See https://docs.chain.link/docs/using-chainlink-reference-contracts
      */
-    function price(string memory symbol) external view override returns (uint256) {
+    function price(string memory symbol) external view returns (uint256) {
         if (areStringsEqual(symbol, "ETH")) {
             return wethPrice;
         } else if (areStringsEqual(symbol, "DAI")) {
