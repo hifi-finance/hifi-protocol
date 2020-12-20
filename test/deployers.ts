@@ -21,7 +21,7 @@ import { FyToken } from "../typechain/FyToken";
 import { GodModeBalanceSheet } from "../typechain/GodModeBalanceSheet";
 import { GodModeRedemptionPool } from "../typechain/GodModeRedemptionPool";
 import { GodModeFyToken } from "../typechain/GodModeFyToken";
-import { SimplePriceOracleView } from "../typechain/SimplePriceOracleView";
+import { SimplePriceOracleView as _SimplePriceOracleView } from "../typechain/SimplePriceOracleView";
 import { TestOraclePriceUtils as OraclePriceUtils } from "../typechain/TestOraclePriceUtils";
 import { fyTokenConstants, gasLimits } from "../helpers/constants";
 
@@ -158,13 +158,13 @@ export async function deployOraclePriceUtils(deployer: Signer, oracleAddress: st
   return oraclePriceUtils;
 }
 
-export async function deploySimplePriceOracleView(deployer: Signer): Promise<SimplePriceOracleView> {
-  const SimplePriceOracleView: SimplePriceOracleView = (await deployContract(
+export async function deploySimplePriceOracleView(deployer: Signer): Promise<_SimplePriceOracleView> {
+  const SimplePriceOracleView: _SimplePriceOracleView = (await deployContract(
     deployer,
     SimplePriceOracleViewArtifact,
     [],
     overrideOptions,
-  )) as SimplePriceOracleView;
+  )) as _SimplePriceOracleView;
   return SimplePriceOracleView;
 }
 
