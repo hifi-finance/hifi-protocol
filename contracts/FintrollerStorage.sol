@@ -4,7 +4,7 @@ pragma solidity ^0.7.0;
 import "@paulrberg/contracts/math/Exponential.sol";
 
 import "./FyTokenInterface.sol";
-import "./oracles/UniswapAnchoredViewInterface.sol";
+import "./oracles/IChainlinkOperator.sol";
 
 /**
  * @title FintrollerStorage
@@ -31,7 +31,7 @@ abstract contract FintrollerStorage is Exponential {
     /**
      * @notice The contract that provides price data for the collateral and the underlying asset.
      */
-    UniswapAnchoredViewInterface public oracle;
+    IChainlinkOperator public oracle;
 
     /**
      * @notice Multiplier representing the discount on collateral that a liquidator receives.

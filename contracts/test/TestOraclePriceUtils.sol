@@ -3,7 +3,7 @@ pragma solidity ^0.7.0;
 
 import "@paulrberg/contracts/math/CarefulMath.sol";
 import "../oracles/OraclePriceUtils.sol";
-import "../oracles/UniswapAnchoredViewInterface.sol";
+import "../oracles/IChainlinkOperator.sol";
 
 /**
  * @title TestOraclePriceUtils
@@ -11,11 +11,11 @@ import "../oracles/UniswapAnchoredViewInterface.sol";
  * @dev Strictly for test purposes. Do not use in production.
  */
 contract TestOraclePriceUtils {
-    using OraclePriceUtils for UniswapAnchoredViewInterface;
+    using OraclePriceUtils for IChainlinkOperator;
 
-    UniswapAnchoredViewInterface public oracle;
+    IChainlinkOperator public oracle;
 
-    constructor(UniswapAnchoredViewInterface oracle_) {
+    constructor(IChainlinkOperator oracle_) {
         oracle = oracle_;
     }
 

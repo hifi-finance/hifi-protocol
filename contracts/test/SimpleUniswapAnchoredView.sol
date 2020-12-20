@@ -1,14 +1,14 @@
 /* SPDX-License-Identifier: LGPL-3.0-or-later */
 pragma solidity ^0.7.0;
 
-import "../oracles/UniswapAnchoredViewInterface.sol";
+import "../oracles/IChainlinkOperator.sol";
 
 /**
  * @title SimpleUniswapAnchoredView
  * @author Mainframe
  * @dev Strictly for testing purposes. Do not use in production.
  */
-contract SimpleUniswapAnchoredView is UniswapAnchoredViewInterface {
+contract SimpleUniswapAnchoredView is IChainlinkOperator {
     uint256 public daiPrice;
     uint256 public wethPrice;
 

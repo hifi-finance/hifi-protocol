@@ -11,7 +11,7 @@ import "./BalanceSheetInterface.sol";
 import "./FintrollerInterface.sol";
 import "./FyTokenInterface.sol";
 import "./oracles/OraclePriceUtils.sol";
-import "./oracles/UniswapAnchoredViewInterface.sol";
+import "./oracles/IChainlinkOperator.sol";
 
 /**
  * @title BalanceSheet
@@ -24,7 +24,7 @@ contract BalanceSheet is
     Admin, /* two dependencies */
     Exponential /* two dependencies */
 {
-    using OraclePriceUtils for UniswapAnchoredViewInterface;
+    using OraclePriceUtils for IChainlinkOperator;
     using SafeErc20 for Erc20Interface;
 
     modifier isVaultOpenForMsgSender(FyTokenInterface fyToken) {
@@ -89,7 +89,7 @@ contract BalanceSheet is
         }
 
         /* Grab the upscaled USD price of the underlying. */
-        UniswapAnchoredViewInterface oracle = fintroller.oracle();
+        IChainlinkOperator oracle = fintroller.oracle();
         vars.oraclePricePrecisionScalar = fintroller.oraclePricePrecisionScalar();
         (vars.mathErr, vars.underlyingPriceUpscaled) = oracle.getAdjustedPrice(
             fyToken.underlying().symbol(),
@@ -201,7 +201,7 @@ contract BalanceSheet is
         require(debt > 0, "ERR_GET_HYPOTHETICAL_COLLATERALIZATION_RATIO_DEBT_ZERO");
 
         /* Grab the upscaled USD price of the collateral. */
-        UniswapAnchoredViewInterface oracle = fintroller.oracle();
+        IChainlinkOperator oracle = fintroller.oracle();
         vars.oraclePricePrecisionScalar = fintroller.oraclePricePrecisionScalar();
         (vars.mathErr, vars.collateralPriceUpscaled) = oracle.getAdjustedPrice(
             fyToken.collateral().symbol(),

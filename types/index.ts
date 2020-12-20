@@ -12,7 +12,7 @@ import { GodModeFyToken } from "../typechain/GodModeFyToken";
 import { RedemptionPool } from "../typechain/RedemptionPool";
 import { TestOraclePriceUtils as OraclePriceUtils } from "../typechain/TestOraclePriceUtils";
 import { SimpleUniswapAnchoredView } from "../typechain/SimpleUniswapAnchoredView";
-import { UniswapAnchoredViewInterface } from "../typechain/UniswapAnchoredViewInterface";
+import { IChainlinkOperator } from "../typechain/IChainlinkOperator";
 
 /* Fingers-crossed that ethers.js or waffle will provide an easier way to cache the address */
 export interface Accounts {
@@ -31,7 +31,7 @@ export interface Contracts {
   collateral: Erc20Mintable;
   fintroller: Fintroller;
   fyToken: GodModeFyToken | FyToken;
-  oracle: SimpleUniswapAnchoredView | UniswapAnchoredViewInterface;
+  oracle: SimpleUniswapAnchoredView | IChainlinkOperator;
   oraclePriceUtils: OraclePriceUtils;
   redemptionPool: GodModeRedemptionPool | RedemptionPool;
   underlying: Erc20Mintable;

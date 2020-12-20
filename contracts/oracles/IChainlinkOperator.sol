@@ -2,12 +2,11 @@
 pragma solidity ^0.7.0;
 
 /**
- * @title UniswapAnchoredViewInterface
+ * @title IChainlinkOperator
  * @author Mainframe
- * @notice Interface for accessing the Compound Open Price Feed.
- * https://compound.finance/docs/prices
+ * @notice Interface mainframe's Chainlink pricefeed operator.
  */
-interface UniswapAnchoredViewInterface {
+interface IChainlinkOperator {
     /**
      * @notice Get the official price for a symbol.
      * @param symbol The symbol to fetch the price of.
