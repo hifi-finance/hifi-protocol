@@ -7,12 +7,12 @@ import "./IChainlinkOperator.sol";
 /**
  * @title OraclePriceUtils
  * @author Mainframe
- * @notice Parses the price data returned by the Compound Open Price Feed
+ * @notice Parses the price data returned by the Chainlink USD price feed
  * to the format expected by Mainframe.
  */
 library OraclePriceUtils {
     /**
-     * @notice Converts the 6 decimal prices returned by the Open Price Feed to mantissa form,
+     * @notice Converts the 8 decimal prices returned by the Chainlink USD price feed to mantissa form,
      * which has 18 decimals.
      *
      * @dev Requirements:

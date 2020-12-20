@@ -5,7 +5,7 @@ import { expect } from "chai";
 import scenarios from "../../../scenarios";
 
 import { OraclePriceUtilsErrors } from "../../../../helpers/errors";
-import { openPriceFeedPrecisionScalar } from "../../../../helpers/constants";
+import { chainlinkPriceFeedPrecisionScalar } from "../../../../helpers/constants";
 
 export default function shouldBehaveLikeGetAdjustedPrice(): void {
   /* We are not using "ETH" here because we're not mocking the oracle itself. */
@@ -20,7 +20,7 @@ export default function shouldBehaveLikeGetAdjustedPrice(): void {
 
     it("reverts", async function () {
       await expect(
-        this.contracts.oraclePriceUtils.testGetAdjustedPrice(unavailableSymbol, openPriceFeedPrecisionScalar),
+        this.contracts.oraclePriceUtils.testGetAdjustedPrice(unavailableSymbol, chainlinkPriceFeedPrecisionScalar),
       ).to.be.revertedWith(OraclePriceUtilsErrors.PriceZero);
     });
   });
@@ -39,9 +39,9 @@ export default function shouldBehaveLikeGetAdjustedPrice(): void {
         const collateralPrice: BigNumber = scenarios.local.oracle.prices.collateral;
         const adjustedPrice: BigNumber = await this.contracts.oraclePriceUtils.testGetAdjustedPrice(
           collateralSymbol,
-          openPriceFeedPrecisionScalar,
+          chainlinkPriceFeedPrecisionScalar,
         );
-        expect(adjustedPrice).to.equal(collateralPrice.mul(openPriceFeedPrecisionScalar));
+        expect(adjustedPrice).to.equal(collateralPrice.mul(chainlinkPriceFeedPrecisionScalar));
       });
     });
   });

@@ -13,8 +13,8 @@ contract SimpleUniswapAnchoredView is IChainlinkOperator {
     uint256 public wethPrice;
 
     constructor() {
-        daiPrice = 1000000; /* $1 */
-        wethPrice = 100000000; /* $100 */
+        daiPrice = 100000000; /* $1 */
+        wethPrice = 10000000000; /* $100 */
     }
 
     function setDaiPrice(uint256 newDaiPrice) external {
@@ -26,8 +26,8 @@ contract SimpleUniswapAnchoredView is IChainlinkOperator {
     }
 
     /**
-     * @notice Prices are returned in the format that the Open Price Feed uses, i.e. 6 decimals of precision.
-     * @dev See https://compound.finance/docs/prices#price
+     * @notice Prices are returned in the format that the Chainlink USD price feeds use, i.e. 8 decimals of precision.
+     * @dev See https://docs.chain.link/docs/using-chainlink-reference-contracts
      */
     function price(string memory symbol) external view override returns (uint256) {
         if (areStringsEqual(symbol, "ETH")) {

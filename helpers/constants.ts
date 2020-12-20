@@ -12,8 +12,8 @@ export const ten: BigNumber = BigNumber.from(10);
 export const tenMillion: BigNumber = ten.pow(7);
 export const fiftyMillion: BigNumber = tenMillion.mul(50);
 export const defaultNumberOfDecimals: BigNumber = BigNumber.from(18);
-export const openPriceFeedPrecision: BigNumber = BigNumber.from(6);
-export const openPriceFeedPrecisionScalar: BigNumber = ten.pow(defaultNumberOfDecimals.sub(openPriceFeedPrecision));
+export const chainlinkPriceFeedPrecision: BigNumber = BigNumber.from(8);
+export const chainlinkPriceFeedPrecisionScalar: BigNumber = ten.pow(defaultNumberOfDecimals.sub(chainlinkPriceFeedPrecision));
 
 /* Represented as mantissas (decimal scalars with 18 decimals). */
 export const percentages: { [name: string]: BigNumber } = {
@@ -32,11 +32,11 @@ export const precisionScalars = {
   tokenWithEighteenDecimals: One,
 };
 
-/* Prices with 6 decimals, as per the Open Price Feed format. */
+/* Prices with 8 decimals, as per Chainlink USD price feed format. */
 export const prices: { [name: string]: BigNumber } = {
-  oneDollar: ten.pow(6),
-  twelveDollars: ten.pow(6).mul(12),
-  oneHundredDollars: ten.pow(8),
+  oneDollar: ten.pow(8),
+  twelveDollars: ten.pow(8).mul(12),
+  oneHundredDollars: ten.pow(10),
 };
 
 /* These amounts assume that the token has 18 decimals. */
@@ -105,7 +105,7 @@ export const fintrollerConstants = {
   defaultCollateralizationRatio: percentages.oneHundredAndFifty,
   liquidationIncentiveLowerBoundMantissa: percentages.oneHundred,
   liquidationIncentiveUpperBoundMantissa: percentages.oneHundredAndFifty,
-  oraclePrecisionScalar: openPriceFeedPrecisionScalar,
+  oraclePrecisionScalar: chainlinkPriceFeedPrecisionScalar,
 };
 
 /* TODO: make the name and symbol match the expiration time */

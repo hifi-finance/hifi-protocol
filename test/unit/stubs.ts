@@ -12,7 +12,7 @@ import RedemptionPoolArtifact from "../../artifacts/contracts/RedemptionPool.sol
 import SimpleUniswapAnchoredViewArtifact from "../../artifacts/contracts/test/SimpleUniswapAnchoredView.sol/SimpleUniswapAnchoredView.json";
 import scenarios from "../scenarios";
 
-import { balanceSheetConstants, etherSymbol, openPriceFeedPrecision } from "../../helpers/constants";
+import { balanceSheetConstants, etherSymbol, chainlinkPriceFeedPrecision } from "../../helpers/constants";
 
 const { deployMockContract: deployStubContract } = waffle;
 
@@ -52,7 +52,7 @@ export async function deployStubErc20(
 export async function deployStubFintroller(deployer: Signer): Promise<MockContract> {
   const fintroller: MockContract = await deployStubContract(deployer, FintrollerArtifact.abi);
   await fintroller.mock.isFintroller.returns(true);
-  await fintroller.mock.oraclePricePrecisionScalar.returns(openPriceFeedPrecision);
+  await fintroller.mock.oraclePricePrecisionScalar.returns(chainlinkPriceFeedPrecision);
   return fintroller;
 }
 
