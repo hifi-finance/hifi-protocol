@@ -11,7 +11,7 @@ import GodModeBalanceSheetArtifact from "../artifacts/contracts/test/GodModeBala
 import GodModeFyTokenArtifact from "../artifacts/contracts/test/GodModeFyToken.sol/GodModeFyToken.json";
 import GodModeRedemptionPoolArtifact from "../artifacts/contracts/test/GodModRedemptionPool.sol/GodModeRedemptionPool.json";
 import OraclePriceUtilsArtifact from "../artifacts/contracts/test/TestOraclePriceUtils.sol/TestOraclePriceUtils.json";
-import SimpleUniswapAnchoredViewArtifact from "../artifacts/contracts/test/SimpleUniswapAnchoredView.sol/SimpleUniswapAnchoredView.json";
+import SimplePriceOracleViewArtifact from "../artifacts/contracts/test/SimplePriceOracleView.sol/SimplePriceOracleView.json";
 import scenarios from "./scenarios";
 
 import { BalanceSheet } from "../typechain/BalanceSheet";
@@ -21,7 +21,7 @@ import { FyToken } from "../typechain/FyToken";
 import { GodModeBalanceSheet } from "../typechain/GodModeBalanceSheet";
 import { GodModeRedemptionPool } from "../typechain/GodModeRedemptionPool";
 import { GodModeFyToken } from "../typechain/GodModeFyToken";
-import { SimpleUniswapAnchoredView } from "../typechain/SimpleUniswapAnchoredView";
+import { SimplePriceOracleView } from "../typechain/SimplePriceOracleView";
 import { TestOraclePriceUtils as OraclePriceUtils } from "../typechain/TestOraclePriceUtils";
 import { fyTokenConstants, gasLimits } from "../helpers/constants";
 
@@ -158,14 +158,14 @@ export async function deployOraclePriceUtils(deployer: Signer, oracleAddress: st
   return oraclePriceUtils;
 }
 
-export async function deploySimpleUniswapAnchoredView(deployer: Signer): Promise<SimpleUniswapAnchoredView> {
-  const simpleUniswapAnchoredView: SimpleUniswapAnchoredView = (await deployContract(
+export async function deploySimplePriceOracleView(deployer: Signer): Promise<SimplePriceOracleView> {
+  const SimplePriceOracleView: SimplePriceOracleView = (await deployContract(
     deployer,
-    SimpleUniswapAnchoredViewArtifact,
+    SimplePriceOracleViewArtifact,
     [],
     overrideOptions,
-  )) as SimpleUniswapAnchoredView;
-  return simpleUniswapAnchoredView;
+  )) as SimplePriceOracleView;
+  return SimplePriceOracleView;
 }
 
 export async function deployUnderlying(deployer: Signer): Promise<Erc20Mintable> {

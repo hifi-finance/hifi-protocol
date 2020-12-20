@@ -47,7 +47,7 @@ const config: HardhatUserConfig = {
   gasReporter: {
     currency: "USD",
     enabled: process.env.REPORT_GAS ? true : false,
-    excludeContracts: ["Erc20Mintable", "SimpleUniswapAnchoredView", "TestOraclePriceUtils"],
+    excludeContracts: ["Erc20Mintable", "SimplePriceOracleView", "TestOraclePriceUtils"],
     src: "./contracts",
   },
   networks: {

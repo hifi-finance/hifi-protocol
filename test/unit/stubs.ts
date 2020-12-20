@@ -9,7 +9,7 @@ import Erc20Artifact from "../../artifacts/@paulrberg/contracts/token/erc20/Erc2
 import FintrollerArtifact from "../../artifacts/contracts/Fintroller.sol/Fintroller.json";
 import FyTokenArtifact from "../../artifacts/contracts/FyToken.sol/FyToken.json";
 import RedemptionPoolArtifact from "../../artifacts/contracts/RedemptionPool.sol/RedemptionPool.json";
-import SimpleUniswapAnchoredViewArtifact from "../../artifacts/contracts/test/SimpleUniswapAnchoredView.sol/SimpleUniswapAnchoredView.json";
+import SimplePriceOracleViewArtifact from "../../artifacts/contracts/test/SimplePriceOracleView.sol/SimplePriceOracleView.json";
 import scenarios from "../scenarios";
 
 import { balanceSheetConstants, etherSymbol, chainlinkPriceFeedPrecision } from "../../helpers/constants";
@@ -63,7 +63,7 @@ export async function deployStubFyToken(deployer: Signer): Promise<MockContract>
 }
 
 export async function deployStubOracle(deployer: Signer): Promise<MockContract> {
-  const oracle: MockContract = await deployStubContract(deployer, SimpleUniswapAnchoredViewArtifact.abi);
+  const oracle: MockContract = await deployStubContract(deployer, SimplePriceOracleViewArtifact.abi);
   await oracle.mock.price.withArgs(etherSymbol).returns(scenarios.local.oracle.prices.collateral);
   await oracle.mock.price.withArgs(scenarios.local.underlying.symbol).returns(scenarios.local.oracle.prices.underlying);
   return oracle;

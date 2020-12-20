@@ -4,11 +4,11 @@ pragma solidity ^0.7.0;
 import "../oracles/IChainlinkOperator.sol";
 
 /**
- * @title SimpleUniswapAnchoredView
+ * @title SimplePriceOracleView
  * @author Mainframe
  * @dev Strictly for testing purposes. Do not use in production.
  */
-contract SimpleUniswapAnchoredView {
+contract SimplePriceOracleView {
     uint256 public daiPrice;
     uint256 public wethPrice;
 

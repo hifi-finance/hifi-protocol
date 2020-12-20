@@ -5,14 +5,14 @@ import { Fintroller } from "../../typechain/Fintroller";
 import { GodModeBalanceSheet } from "../../typechain/GodModeBalanceSheet";
 import { GodModeFyToken } from "../../typechain/GodModeFyToken";
 import { GodModeRedemptionPool } from "../../typechain/GodModeRedemptionPool";
-import { SimpleUniswapAnchoredView } from "../../typechain/SimpleUniswapAnchoredView";
+import { SimplePriceOracleView } from "../../typechain/SimplePriceOracleView";
 import {
   deployCollateral,
   deployFintroller,
   deployGodModeBalanceSheet,
   deployGodModeFyToken,
   deployGodModeRedemptionPool,
-  deploySimpleUniswapAnchoredView,
+  deploySimplePriceOracleView,
   deployUnderlying,
 } from "../deployers";
 import { fyTokenConstants } from "../../helpers/constants";
@@ -22,7 +22,7 @@ type IntegrationFixtureReturnType = {
   collateral: Erc20Mintable;
   fintroller: Fintroller;
   fyToken: GodModeFyToken;
-  oracle: SimpleUniswapAnchoredView;
+  oracle: SimplePriceOracleView;
   redemptionPool: GodModeRedemptionPool;
   underlying: Erc20Mintable;
 };
@@ -30,7 +30,7 @@ type IntegrationFixtureReturnType = {
 export async function integrationFixture(signers: Signer[]): Promise<IntegrationFixtureReturnType> {
   const deployer: Signer = signers[0];
 
-  const oracle: SimpleUniswapAnchoredView = await deploySimpleUniswapAnchoredView(deployer);
+  const oracle: SimplePriceOracleView = await deploySimplePriceOracleView(deployer);
   const fintroller: Fintroller = await deployFintroller(deployer);
   await fintroller.connect(deployer).setOracle(oracle.address);
 
