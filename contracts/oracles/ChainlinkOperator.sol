@@ -43,6 +43,7 @@ contract ChainlinkOperator is ChainlinkOperatorInterface {
         require(decimals == 8, "ChainlinkOperator: non-USD price feed");
 
         _feeds[asset.symbol()] = Feed(address(feed), address(asset), false);
+        emit FeedAdded(address(feed), address(asset));
     }
 
     /// @inheritdoc ChainlinkOperatorInterface
@@ -53,10 +54,12 @@ contract ChainlinkOperator is ChainlinkOperatorInterface {
     /// @inheritdoc ChainlinkOperatorInterface
     function disableFeed(string memory symbol) external override feedExists(_feeds[symbol].id) onlyOwner {
         _feeds[symbol].disabled = true;
+        emit FeedDisabled(_feeds[symbol].id);
     }
 
     /// @inheritdoc ChainlinkOperatorInterface
     function enableFeed(string memory symbol) external override feedExists(_feeds[symbol].id) onlyOwner {
         _feeds[symbol].disabled = false;
+        emit FeedEnabled(_feeds[symbol].id);
     }
 }

@@ -48,4 +48,8 @@ interface ChainlinkOperatorInterface {
      * @param symbol The symbol of asset to enable price feed of.
      */
     function enableFeed(string memory symbol) external;
+
+    event FeedAdded(address indexed feedId, address indexed asset);
+    event FeedDisabled(address indexed feedId);
+    event FeedEnabled(address indexed feedId);
 }
