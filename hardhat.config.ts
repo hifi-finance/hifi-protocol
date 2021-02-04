@@ -7,6 +7,7 @@ import "@nomiclabs/hardhat-waffle";
 import "hardhat-gas-reporter";
 import "hardhat-typechain";
 import "solidity-coverage";
+import "@nomiclabs/hardhat-etherscan";
 
 import { chainIds, gasLimits } from "./helpers/constants";
 import "./tasks/accounts";
@@ -42,6 +43,9 @@ function createTestnetConfig(network: keyof typeof chainIds): NetworkUserConfig 
 }
 
 const config: HardhatUserConfig = {
+  etherscan: {
+    apiKey: 'PPDPRVSBF5RSG11YJBBEJEDH122YM138HP',
+  },
   defaultNetwork: "hardhat",
   gasReporter: {
     currency: "USD",

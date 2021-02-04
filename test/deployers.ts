@@ -11,6 +11,8 @@ import GodModeBalanceSheetArtifact from "../artifacts/contracts/test/GodModeBala
 import GodModeFyTokenArtifact from "../artifacts/contracts/test/GodModeFyToken.sol/GodModeFyToken.json";
 import GodModeRedemptionPoolArtifact from "../artifacts/contracts/test/GodModRedemptionPool.sol/GodModeRedemptionPool.json";
 import SimplePriceFeedArtifact from "../artifacts/contracts/test/SimplePriceFeed.sol/SimplePriceFeed.json";
+import UniswapPriceFeedArtifact from "../artifacts/contracts/oracles/uniswap/UniswapPriceFeed.sol/UniswapPriceFeed.json";
+import UniswapTestPairArtifact from "../artifacts/contracts/test/UniswapTestPair.sol/UniswapTestPair.json";
 
 import { ChainlinkOperator } from "../typechain/ChainlinkOperator";
 import { Erc20Mintable } from "../typechain/Erc20Mintable";
@@ -21,6 +23,8 @@ import { GodModeRedemptionPool } from "../typechain/GodModeRedemptionPool";
 import { GodModeFyToken } from "../typechain/GodModeFyToken";
 import { SimplePriceFeed } from "../typechain/SimplePriceFeed";
 import { fyTokenConstants, gasLimits, prices } from "../helpers/constants";
+import { UniswapPriceFeed } from "../typechain/UniswapPriceFeed";
+import { UniswapTestPair } from "../typechain/UniswapTestPair";
 
 const { deployContract } = waffle;
 const overrideOptions: TransactionRequest = {
@@ -149,4 +153,58 @@ export async function deployUnderlyingPriceFeed(deployer: Signer): Promise<Simpl
   );
   await underlyingPriceFeed.setPrice(prices.oneDollar);
   return underlyingPriceFeed;
+}
+
+export async function deployUniswapCollateral(deployer: Signer): Promise<Erc20Mintable> {
+  const uniswapCollateral: Erc20Mintable = <Erc20Mintable>(
+    await deployContract(deployer, Erc20MintableArtifact, ['SOCKS', 'SOCKS', BigNumber.from(18)], overrideOptions)
+  );
+  return uniswapCollateral;
+}
+
+export async function deployUniswapPriceFeed(
+  deployer: Signer,
+  description: string,
+  factoryAddress: string,
+  windowSize: BigNumber,
+  granularity: BigNumber,
+  wethAddress: string,
+  targetToken: string,
+  pair: string,
+  priceFeed: string,
+): Promise<UniswapPriceFeed> {
+  const uniswapPriceFeed: UniswapPriceFeed = <UniswapPriceFeed>(
+    await deployContract(
+      deployer,
+      UniswapPriceFeedArtifact,
+      [
+        description,
+        factoryAddress,
+        windowSize,
+        granularity,
+        wethAddress,
+        targetToken,
+        pair,
+        priceFeed,
+      ],
+      overrideOptions,
+    )
+  );
+
+  return uniswapPriceFeed;
+}
+
+export async function deployUniswapTestPair(
+  deployer: Signer,
+): Promise<UniswapTestPair> {
+  const uniswapTestPair: UniswapTestPair = <UniswapTestPair>(
+    await deployContract(
+      deployer,
+      UniswapTestPairArtifact,
+      [],
+      overrideOptions,
+    )
+  );
+
+  return uniswapTestPair;
 }

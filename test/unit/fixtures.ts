@@ -7,6 +7,7 @@ import { Fintroller } from "../../typechain/Fintroller";
 import { GodModeBalanceSheet } from "../../typechain/GodModeBalanceSheet";
 import { GodModeFyToken } from "../../typechain/GodModeFyToken";
 import { GodModeRedemptionPool } from "../../typechain/GodModeRedemptionPool";
+import { UniswapPriceFeed } from "../../typechain/UniswapPriceFeed";
 
 import {
   deployChainlinkOperator,
@@ -14,6 +15,7 @@ import {
   deployGodModeBalanceSheet,
   deployGodModeFyToken,
   deployGodModeRedemptionPool,
+  deployUniswapPriceFeed,
 } from "../deployers";
 import {
   deployStubBalanceSheet,
@@ -24,8 +26,11 @@ import {
   deployStubRedemptionPool,
   deployStubFyToken,
   deployStubUnderlying,
+  deployStubErc20,
+  deployStubUniswapTestPair,
 } from "./stubs";
 import { fyTokenConstants } from "../../helpers/constants";
+import { BigNumber } from "ethers";
 
 type UnitFixtureBalanceSheetReturnType = {
   balanceSheet: GodModeBalanceSheet;
@@ -68,6 +73,39 @@ export async function unitFixtureChainlinkOperator(signers: Signer[]): Promise<U
   const collateralPriceFeed: MockContract = await deployStubCollateralPriceFeed(deployer);
   const oracle: ChainlinkOperator = await deployChainlinkOperator(deployer);
   return { collateral, collateralPriceFeed, oracle };
+}
+
+type UnitFixtureUniswapPriceFeedReturnType = {
+  uniswapPriceFeed: UniswapPriceFeed;
+}
+
+export async function unitFixtureUniswapPriceFeed(signers: Signer[]): Promise<UnitFixtureUniswapPriceFeedReturnType> {
+  const deployer: Signer = signers[0];
+
+  const uniswapCollateral: MockContract = await deployStubErc20(deployer, "SOCKS", "SOCKS", BigNumber.from(18));
+  const uniswapTestPair: MockContract = await deployStubUniswapTestPair(deployer);
+  const collateralPriceFeed: MockContract = await deployStubCollateralPriceFeed(deployer);
+  await collateralPriceFeed.mock.latestRoundData.returns(
+    0,
+    BigNumber.from('142219062145'),
+    0,
+    0,
+    0,
+  );
+
+  const uniswapPriceFeed: UniswapPriceFeed = await deployUniswapPriceFeed(
+    deployer,
+    'SOCKS/USD',
+    '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
+    BigNumber.from(240),
+    BigNumber.from(4),
+    '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f', // TODO: Change this fake address
+    uniswapCollateral.address,
+    uniswapTestPair.address,
+    collateralPriceFeed.address,
+  );
+
+  return { uniswapPriceFeed };
 }
 
 type UnitFixtureFintrollerReturnType = {

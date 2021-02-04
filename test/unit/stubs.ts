@@ -11,6 +11,8 @@ import FintrollerArtifact from "../../artifacts/contracts/Fintroller.sol/Fintrol
 import FyTokenArtifact from "../../artifacts/contracts/FyToken.sol/FyToken.json";
 import RedemptionPoolArtifact from "../../artifacts/contracts/RedemptionPool.sol/RedemptionPool.json";
 import SimplePriceFeedArtifact from "../../artifacts/contracts/test/SimplePriceFeed.sol/SimplePriceFeed.json";
+import UniswapPriceFeedArtifact from "../../artifacts/contracts/oracles/uniswap/UniswapPriceFeed.sol/UniswapPriceFeed.json";
+import UniswapTestPairArtifact from "../../artifacts/contracts/test/UniswapTestPair.sol/UniswapTestPair.json";
 
 import { balanceSheetConstants, chainlinkPricePrecision, prices } from "../../helpers/constants";
 
@@ -35,6 +37,18 @@ export async function deployStubChainlinkOperator(deployer: Signer): Promise<Moc
 export async function deployStubCollateral(deployer: Signer): Promise<MockContract> {
   const collateral: MockContract = await deployStubErc20(deployer, "Wrapped ETH", "WETH", BigNumber.from(18));
   return collateral;
+}
+
+export async function deployStubUniswapTestPair(deployer: Signer): Promise<MockContract> {
+  const uniswapTestPair: MockContract = await deployStubContract(deployer, UniswapTestPairArtifact.abi);
+  await uniswapTestPair.mock.getReserves.returns(
+    BigNumber.from('7168532207110964041'),
+    BigNumber.from('121734605843612042612'),
+    BigNumber.from('1612253703'),
+  );
+  await uniswapTestPair.mock.price0CumulativeLast.returns(BigNumber.from('59192873252111958991201249583941817564801086'));
+  await uniswapTestPair.mock.price1CumulativeLast.returns(BigNumber.from('81561068469246476849810993658498152412154'));
+  return uniswapTestPair;
 }
 
 export async function deployStubCollateralPriceFeed(deployer: Signer): Promise<MockContract> {
