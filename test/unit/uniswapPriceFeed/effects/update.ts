@@ -9,10 +9,10 @@ import {
 } from '../../../jsonRpc';
 
 export default function shouldBehaveLikeUpdate(): void {
-  const expectedETHPrice = BigNumber.from('16981803572404270996');
-  const expectedUSDPrice = BigNumber.from('2415136177597');
+  const expectedETHPrice = BigNumber.from('0');
+  const expectedUSDPrice = BigNumber.from('0');
 
-  const windowSize = 240;
+  const windowSize = 3600;
   const granularity = 4;
   const periodSize = windowSize / granularity;
 

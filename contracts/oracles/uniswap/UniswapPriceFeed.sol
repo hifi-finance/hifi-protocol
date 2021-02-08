@@ -1,6 +1,8 @@
 /* SPDX-License-Identifier: LGPL-3.0-or-later */
 pragma solidity ^0.7.0;
 
+import "hardhat/console.sol";
+
 import "@paulrberg/contracts/token/erc20/Erc20.sol";
 
 import "./libraries/IUniswapV2Factory.sol";
@@ -196,7 +198,7 @@ contract UniswapPriceFeed is AggregatorV3Interface {
 
     uint256 amountIn = 1 * 10 ** targetTokenDecimals;
 
-    if (token0 != targetToken) {
+    if (token0 == targetToken) {
       return computeAmountOut(firstObservation.price0Cumulative, price0Cumulative, timeElapsed, amountIn);
     } else {
       return computeAmountOut(firstObservation.price1Cumulative, price1Cumulative, timeElapsed, amountIn);
@@ -209,8 +211,15 @@ contract UniswapPriceFeed is AggregatorV3Interface {
    */
   function getLatestPrice() public view returns (uint256) {
     uint256 priceInETH = getLatestETHPrice();
+
+    console.log("Price in ETH is %s", priceInETH);
+
     (, int256 price, , , ) = priceFeed.latestRoundData();
-    return priceInETH.mul(uint256(price)) / 10 ** 18;
+
+    uint256 priceInUSD = priceInETH.mul(uint256(price)) / 10 ** 18;
+    console.log("Price in USD is %s", priceInUSD);
+
+    return priceInUSD;
   }
 
   /**

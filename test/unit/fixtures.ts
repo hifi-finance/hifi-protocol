@@ -87,7 +87,7 @@ export async function unitFixtureUniswapPriceFeed(signers: Signer[]): Promise<Un
   const collateralPriceFeed: MockContract = await deployStubCollateralPriceFeed(deployer);
   await collateralPriceFeed.mock.latestRoundData.returns(
     0,
-    BigNumber.from('142219062145'),
+    BigNumber.from('170912399857'),
     0,
     0,
     0,
@@ -97,7 +97,7 @@ export async function unitFixtureUniswapPriceFeed(signers: Signer[]): Promise<Un
     deployer,
     'SOCKS/USD',
     '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
-    BigNumber.from(240),
+    BigNumber.from(3600),
     BigNumber.from(4),
     '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f', // TODO: Change this fake address
     uniswapCollateral.address,

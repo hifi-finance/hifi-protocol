@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 export default function shouldBehaveLikeGetStuff(): void {
-  const windowSize = 240;
+  const windowSize = 3600;
   const granularity = 4;
   const periodSize = windowSize / granularity;
 
