@@ -268,6 +268,7 @@ contract RedemptionPool is
             bp.bind(address(fyToken), vars.fyTokenAmount, 25);
             bPool = bp;
         } else {
+            // TODO: fix slippage handling
             uint256[] memory maxAmountsIn;
             (vars.mathErr, vars.underlyingAmountSlippage) = divUInt(underlyingAmount, vars.slippagePercentage);
             require(vars.mathErr == MathError.NO_ERROR, "ERR_SYNC_BPOOL_MATH_ERROR");
@@ -303,6 +304,7 @@ contract RedemptionPool is
      * Requirements:
      *
      * - The amount to redeem cannot be zero.
+     * - The amount to redeem cannot be larger that the sender's leveraged LP position.
      * - The Fintroller must allow this action to be performed.
      *
      * @param lpTokenAmount The amount of underlying to redeem from the Redemption Pool.
@@ -315,6 +317,9 @@ contract RedemptionPool is
         /* Checks: the zero edge case. */
         require(lpTokenAmount > 0, "EXIT_LEVERAGED_LP_ZERO");
 
+        /* Checks: the zero edge case. */
+        require(lpTokenAmount <= leveragedLPPositions[msg.sender].totalUnderlying, "EXIT_LEVERAGED_LP_ABOVE_POSITION");
+
         /* Checks: the Fintroller allows this action to be performed. */
         // TODO: add fintroller rules
         // require(fintroller.getSupplyUnderlyingAllowed(fyToken), ERR_EXIT_LEVERAGED_LP_NOT_ALLOWED");
@@ -324,6 +329,7 @@ contract RedemptionPool is
          * If the precision scalar is 1, it means that the underlying also has 18 decimals.
          */
         vars.fyTokenAmount = lpTokenAmount;
+        // TODO: fix to use lp token scalar precision instead.
         vars.underlyingPrecisionScalar = fyToken.underlyingPrecisionScalar();
         if (vars.underlyingPrecisionScalar != 1) {
             (vars.mathErr, vars.underlyingAmount) = divUInt(lpTokenAmount, vars.underlyingPrecisionScalar);
