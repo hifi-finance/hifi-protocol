@@ -10,6 +10,7 @@ import "@paulrberg/contracts/utils/ReentrancyGuard.sol";
 
 import "./FintrollerInterface.sol";
 import "./RedemptionPoolInterface.sol";
+import "./external/balancer/BFactoryInterface.sol";
 
 /**
  * @title RedemptionPool
@@ -168,5 +169,114 @@ contract RedemptionPool is
         emit SupplyUnderlying(msg.sender, underlyingAmount, vars.fyTokenAmount);
 
         return true;
+    }
+
+    struct SupplyUnderlyingForLeveragedLPLocalVars {
+        MathError mathErr;
+        uint256 fyTokenAmount;
+        uint256 newTotalUnderlying;
+        uint256 underlyingPrecisionScalar;
+    }
+
+    /**
+     * @notice Activate or de-activate the leveraged LP admin lock .
+     *
+     * Requirements:
+     *
+     * - Caller must be admin.
+     *
+     * @param newLock The new value to set the lock to.
+     * @return true = admin lock is now activated, otherwise false.
+     */
+    function setLeveragedLPAdminLock(bool newLock) external override onlyAdmin returns (bool) {
+        isLeveragedLPAdminLocked = newLock;
+        return isLeveragedLPAdminLocked;
+    }
+
+    /**
+     * @notice An alternative to the usual minting method that does not involve taking on debt.
+     * The sole purpose of this method is to provide the initial liquidity on Balancer.
+     *
+     * @dev Emits a {SupplyUnderlyingForLeveragedLP} event.
+     *
+     * Requirements:
+     *
+     * - If admin lock is activated, caller must be admin.
+     * - Must be called prior to maturation.
+     * - The amount to supply cannot be zero.
+     * - The Fintroller must allow this action to be performed.
+     * - The caller must have allowed this contract to spend `underlyingAmount` tokens.
+     *
+     * @param underlyingAmount The amount of underlying to supply to the Redemption Pool.
+     * @return true = success, otherwise it reverts.
+     */
+    function supplyUnderlyingForLeveragedLP(uint256 underlyingAmount) external override nonReentrant returns (bool) {
+        // TODO: would be better to have the leveraged LP functionality be managed through its own separate contract
+        SupplyUnderlyingForLeveragedLPLocalVars memory vars;
+
+        /* Checks: admin lock deactivated or caller is admin. */
+        require(!isLeveragedLPAdminLocked || msg.sender == admin, "ERR_NOT_ADMIN");
+
+        /* Checks: maturation time. */
+        require(block.timestamp < fyToken.expirationTime(), "ERR_BOND_MATURED");
+
+        /* Checks: the zero edge case. */
+        require(underlyingAmount > 0, "ERR_SUPPLY_UNDERLYING_FOR_LEVERAGED_LP_ZERO");
+
+        /* Checks: the Fintroller allows this action to be performed. */
+        // TODO: add fintroller rules
+        // require(fintroller.getSupplyUnderlyingAllowed(fyToken), ERR_SUPPLY_UNDERLYING_FOR_LEVERAGED_LP_NOT_ALLOWED");
+
+        /* Effects: update storage. */
+        (vars.mathErr, vars.newTotalUnderlying) = addUInt(
+            leveragedLPPositions[msg.sender].totalUnderlying,
+            underlyingAmount
+        );
+        require(vars.mathErr == MathError.NO_ERROR, "ERR_SUPPLY_UNDERLYING_FOR_LEVERAGED_LP_MATH_ERROR");
+        leveragedLPPositions[msg.sender].totalUnderlying = vars.newTotalUnderlying;
+
+        /**
+         * fyTokens always have 18 decimals so the underlying amount needs to be upscaled.
+         * If the precision scalar is 1, it means that the underlying also has 18 decimals.
+         */
+        vars.underlyingPrecisionScalar = fyToken.underlyingPrecisionScalar();
+        if (vars.underlyingPrecisionScalar != 1) {
+            (vars.mathErr, vars.fyTokenAmount) = mulUInt(underlyingAmount, vars.underlyingPrecisionScalar);
+            require(vars.mathErr == MathError.NO_ERROR, "ERR_SUPPLY_UNDERLYING_FOR_LEVERAGED_LP_MATH_ERROR");
+        } else {
+            vars.fyTokenAmount = underlyingAmount;
+        }
+
+        /* Interactions: mint the fyTokens. */
+        require(fyToken.mint(address(this), vars.fyTokenAmount), "ERR_SUPPLY_UNDERLYING_FOR_LEVERAGED_LP_CALL_MINT");
+
+        /* Interactions: perform the Erc20 transfer. */
+        fyToken.underlying().safeTransferFrom(msg.sender, address(this), underlyingAmount);
+
+        syncBPool(underlyingAmount, vars.fyTokenAmount);
+
+        emit SupplyUnderlyingForLeveragedLP(msg.sender, underlyingAmount, vars.fyTokenAmount);
+
+        return true;
+    }
+
+    function syncBPool(uint256 underlyingAmount, uint256 fyTokenAmount) internal nonReentrant returns (bool) {
+        if (address(bPool) == address(0)) {
+            // TODO: BFactory address should be inititalized somewhere
+            BPoolInterface bp = BFactoryInterface(address(0x9424B1412450D0f8Fc2255FAf6046b98213B76Bd)).newBPool();
+            // Approve infinite allowances for balancer pool (unsafe)
+            fyToken.underlying().approve(address(bp), uint256(-1));
+            fyToken.approve(address(bp), uint256(-1));
+            bp.bind(address(fyToken.underlying()), underlyingAmount, 25);
+            bp.bind(address(fyToken), fyTokenAmount, 25);
+            bPool = bp;
+            return true;
+        } else {
+            uint256[] memory maxAmountsIn;
+            maxAmountsIn[0] = underlyingAmount;
+            maxAmountsIn[1] = fyTokenAmount;
+            bPool.joinPool(fyTokenAmount, maxAmountsIn);
+            return true;
+        }
     }
 }
