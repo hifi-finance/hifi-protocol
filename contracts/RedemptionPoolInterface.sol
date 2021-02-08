@@ -19,6 +19,8 @@ abstract contract RedemptionPoolInterface is RedemptionPoolStorage {
 
     function supplyUnderlyingForLeveragedLP(uint256 underlyingAmount) external virtual returns (bool);
 
+    function exitLeveragedLP(uint256 underlyingAmount) external virtual returns (bool);
+
     /**
      * EVENTS
      */
@@ -27,4 +29,11 @@ abstract contract RedemptionPoolInterface is RedemptionPoolStorage {
     event SupplyUnderlying(address indexed account, uint256 underlyingAmount, uint256 fyTokenAmount);
 
     event SupplyUnderlyingForLeveragedLP(address indexed account, uint256 underlyingAmount, uint256 fyTokenAmount);
+
+    event ExitLeveragedLP(
+        address indexed account,
+        uint256 lpTokenAmount,
+        uint256 underlyingAmount,
+        uint256 fyTokenAmount
+    );
 }
