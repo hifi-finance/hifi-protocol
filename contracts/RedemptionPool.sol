@@ -171,13 +171,6 @@ contract RedemptionPool is
         return true;
     }
 
-    struct SupplyUnderlyingForLeveragedLPLocalVars {
-        MathError mathErr;
-        uint256 fyTokenAmount;
-        uint256 newTotalUnderlying;
-        uint256 underlyingPrecisionScalar;
-    }
-
     /**
      * @notice Activate or de-activate the leveraged LP admin lock .
      *
@@ -191,6 +184,16 @@ contract RedemptionPool is
     function setLeveragedLPAdminLock(bool newLock) external override onlyAdmin returns (bool) {
         isLeveragedLPAdminLocked = newLock;
         return isLeveragedLPAdminLocked;
+    }
+
+    struct SupplyUnderlyingForLeveragedLPLocalVars {
+        MathError mathErr;
+        uint256 fyTokenAmount;
+        uint256 newTotalUnderlying;
+        uint256 underlyingPrecisionScalar;
+        uint256 slippagePercentage;
+        uint256 underlyingAmountSlippage;
+        uint256 fyTokenAmountSlippage;
     }
 
     /**
@@ -253,7 +256,29 @@ contract RedemptionPool is
         /* Interactions: perform the Erc20 transfer. */
         fyToken.underlying().safeTransferFrom(msg.sender, address(this), underlyingAmount);
 
-        syncBPool(underlyingAmount, vars.fyTokenAmount);
+        vars.slippagePercentage = 10;
+
+        if (address(bPool) == address(0)) {
+            // TODO: BFactory address should be inititalized somewhere
+            BPoolInterface bp = BFactoryInterface(address(0x9424B1412450D0f8Fc2255FAf6046b98213B76Bd)).newBPool();
+            // Approve infinite allowances for balancer pool (unsafe)
+            fyToken.underlying().approve(address(bp), uint256(-1));
+            fyToken.approve(address(bp), uint256(-1));
+            bp.bind(address(fyToken.underlying()), underlyingAmount, 25);
+            bp.bind(address(fyToken), vars.fyTokenAmount, 25);
+            bPool = bp;
+        } else {
+            uint256[] memory maxAmountsIn;
+            (vars.mathErr, vars.underlyingAmountSlippage) = divUInt(underlyingAmount, vars.slippagePercentage);
+            require(vars.mathErr == MathError.NO_ERROR, "ERR_SYNC_BPOOL_MATH_ERROR");
+            maxAmountsIn[0] = underlyingAmount + vars.underlyingAmountSlippage;
+
+            (vars.mathErr, vars.fyTokenAmountSlippage) = divUInt(vars.fyTokenAmount, vars.slippagePercentage);
+            require(vars.mathErr == MathError.NO_ERROR, "ERR_SYNC_BPOOL_MATH_ERROR");
+            maxAmountsIn[1] = vars.fyTokenAmount + vars.fyTokenAmountSlippage;
+
+            bPool.joinPool(vars.fyTokenAmount, maxAmountsIn);
+        }
 
         emit SupplyUnderlyingForLeveragedLP(msg.sender, underlyingAmount, vars.fyTokenAmount);
 
@@ -324,41 +349,5 @@ contract RedemptionPool is
         // emit ExitLeveragedLP(vars.lpTokenAmountOUT, vars.underlyingAmountOUT, vars.fyTokenAmountOUT);
 
         return true;
-    }
-
-    struct SyncBPoolLocalVars {
-        MathError mathErr;
-        uint256 slippagePercentage;
-        uint256 underlyingAmountSlippage;
-        uint256 fyTokenAmountSlippage;
-    }
-
-    function syncBPool(uint256 underlyingAmount, uint256 fyTokenAmount) internal nonReentrant returns (bool) {
-        SyncBPoolLocalVars memory vars;
-        vars.slippagePercentage = 10;
-
-        if (address(bPool) == address(0)) {
-            // TODO: BFactory address should be inititalized somewhere
-            BPoolInterface bp = BFactoryInterface(address(0x9424B1412450D0f8Fc2255FAf6046b98213B76Bd)).newBPool();
-            // Approve infinite allowances for balancer pool (unsafe)
-            fyToken.underlying().approve(address(bp), uint256(-1));
-            fyToken.approve(address(bp), uint256(-1));
-            bp.bind(address(fyToken.underlying()), underlyingAmount, 25);
-            bp.bind(address(fyToken), fyTokenAmount, 25);
-            bPool = bp;
-            return true;
-        } else {
-            uint256[] memory maxAmountsIn;
-            (vars.mathErr, vars.underlyingAmountSlippage) = divUInt(underlyingAmount, vars.slippagePercentage);
-            require(vars.mathErr == MathError.NO_ERROR, "ERR_SYNC_BPOOL_MATH_ERROR");
-            maxAmountsIn[0] = underlyingAmount + vars.underlyingAmountSlippage;
-
-            (vars.mathErr, vars.fyTokenAmountSlippage) = divUInt(fyTokenAmount, vars.slippagePercentage);
-            require(vars.mathErr == MathError.NO_ERROR, "ERR_SYNC_BPOOL_MATH_ERROR");
-            maxAmountsIn[1] = fyTokenAmount + vars.fyTokenAmountSlippage;
-
-            bPool.joinPool(fyTokenAmount, maxAmountsIn);
-            return true;
-        }
     }
 }
