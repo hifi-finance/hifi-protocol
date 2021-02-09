@@ -416,7 +416,7 @@ contract BalanceSheet is
      * - The borrower account cannot fall below the collateralization ratio.
      *
      * @param fyToken The address of the fyToken contract.
-     * @param collateralAmount The amount of free collateral to free.
+     * @param collateralAmount The amount of locked collateral to free.
      * @return bool true = success, otherwise it reverts.
      */
     function freeCollateral(FyTokenInterface fyToken, uint256 collateralAmount)
