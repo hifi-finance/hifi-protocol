@@ -252,7 +252,7 @@ contract BAMMController is
         bPool.rebind(address(fyToken), vars.updatedFyTokenBalance, 25);
 
         /* Interactions: burn the fyTokens. */
-        require(fyToken.burn(msg.sender, vars.fyTokenAmount), "ERR_EXTRACT_LIQUIDITY_CALL_BURN");
+        require(fyToken.burn(address(this), vars.fyTokenAmount), "ERR_EXTRACT_LIQUIDITY_CALL_BURN");
 
         /* Interactions: perform the Erc20 transfer. */
         fyToken.underlying().safeTransfer(msg.sender, underlyingAmount);
