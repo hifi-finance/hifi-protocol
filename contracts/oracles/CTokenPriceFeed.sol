@@ -19,6 +19,11 @@ contract CTokenPriceFeed is
     CTokenInterface public cToken;
     AggregatorV3Interface public priceFeed;
 
+    /**
+     * @param description_ The description of the price feed, e.g. "cWBTC/USD"
+     * @param cToken_ The address of the cToken
+     * @param priceFeed_ The Chainlink price feed providing the USD price of the underlying of the cToken
+     */
     constructor(
       string memory description_,
       address cToken_,
@@ -29,18 +34,39 @@ contract CTokenPriceFeed is
         priceFeed = AggregatorV3Interface(priceFeed_);
     }
 
+    /**
+     * @dev Returns the number of decimals
+     * @return The number of decimals (always 8)
+     */
     function decimals() external pure override returns (uint8) {
         return 8;
     }
 
+    /**
+     * @dev Returns the description of the price feed
+     * @return The description of the price feed
+     */
     function description() external view override returns (string memory) {
         return internalDescription;
     }
 
+    /**
+     * @dev Returns the version of the contract
+     * @return The version of the contract
+     */
     function version() external pure override returns (uint256) {
         return 1;
     }
 
+    /**
+     * @dev Returns the price of the latest round
+     * @param roundId_ This parameter not used but mandatory to comply to the interface
+     * @return roundId Same value as roundId_
+     * @return answer The price of the cToken in USD
+     * @return startedAt Unused value, always 0
+     * @return updatedAt Unused value, always 0
+     * @return answeredInRound Unused value, always 0
+     */
     function getRoundData(uint80 roundId_)
         external
         view
@@ -56,6 +82,14 @@ contract CTokenPriceFeed is
         return (roundId_, getPrice(), 0, 0, 0);
     }
 
+    /**
+     * @dev Returns the price of the latest round
+     * @return roundId Unused value, always 0
+     * @return answer The price of the cToken in USD
+     * @return startedAt Unused value, always 0
+     * @return updatedAt Unused value, always 0
+     * @return answeredInRound Unused value, always 0
+     */
     function latestRoundData()
         external
         view
@@ -71,6 +105,10 @@ contract CTokenPriceFeed is
         return (0, getPrice(), 0, 0, 0);
     }
 
+    /**
+     * @dev Get the USD price of the cToken
+     * @return The price of the cToken in USD
+     */
     function getPrice() private view returns (int256) {
         uint256 exchangeRateMantissa = cToken.exchangeRateStored();
         (, int256 price, , ,) = priceFeed.latestRoundData();
