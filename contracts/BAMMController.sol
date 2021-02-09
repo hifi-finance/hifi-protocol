@@ -28,6 +28,14 @@ contract BAMMController is
     using SafeErc20 for Erc20Interface;
 
     /**
+     * @notice Mark functions that require delegation to the underlying Pool
+     */
+    modifier needsBPool() {
+        require(address(bPool) != address(0), "ERR_BPOOL_NOT_CREATED");
+        _;
+    }
+
+    /**
      * @param fyToken_ The address of the fyToken contract.
      */
     constructor(FyTokenInterface fyToken_) Admin() {
@@ -129,6 +137,9 @@ contract BAMMController is
             bp.bind(address(fyToken.underlying()), underlyingAmount, 25);
             bp.bind(address(fyToken), vars.fyTokenAmount, 25);
 
+            /* Effects: enable public swap. */
+            bp.setPublicSwap(true);
+
             /* Effects: update storage. */
             bPool = bp;
         } else {
@@ -155,9 +166,13 @@ contract BAMMController is
             );
             require(vars.mathErr == MathError.NO_ERROR, "ERR_INJECT_LIQUIDITY_MATH_ERROR");
 
-            /* Effects: set pool percentages (50/50) and supply more liquidity by providing updated balances. */
-            bPool.rebind(address(fyToken.underlying()), vars.updatedUnderlyingBalance, 25);
-            bPool.rebind(address(fyToken), vars.updatedFyTokenBalance, 25);
+            /* Effects: supply more liquidity by providing updated balances. */
+            bPool.rebind(
+                address(fyToken.underlying()),
+                vars.updatedUnderlyingBalance,
+                bPool.getDenormalizedWeight(address(fyToken.underlying()))
+            );
+            bPool.rebind(address(fyToken), vars.updatedFyTokenBalance, bPool.getDenormalizedWeight(address(fyToken)));
 
             // NOTE: alternative to rebind, we could directly send tokens to pool and then call gulp on each
         }
@@ -190,7 +205,7 @@ contract BAMMController is
      * liquidity (matched with the equivalent amount of fyTokens).
      * @return true = success, otherwise it reverts.
      */
-    function extractLiquidity(uint256 underlyingAmount) external override nonReentrant returns (bool) {
+    function extractLiquidity(uint256 underlyingAmount) external override nonReentrant needsBPool returns (bool) {
         ExtractLiquidityLocalVars memory vars;
 
         /* Checks: the zero edge case. */
