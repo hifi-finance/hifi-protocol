@@ -2,6 +2,7 @@
 pragma solidity ^0.7.0;
 
 import "./FyTokenInterface.sol";
+import "./FintrollerInterface.sol";
 
 /**
  * @title BalanceSheetStorage
