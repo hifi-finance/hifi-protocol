@@ -30,10 +30,5 @@ abstract contract RedemptionPoolInterface is RedemptionPoolStorage {
 
     event SupplyUnderlyingForLeveragedLP(address indexed account, uint256 underlyingAmount, uint256 fyTokenAmount);
 
-    event ExitLeveragedLP(
-        address indexed account,
-        uint256 lpTokenAmount,
-        uint256 underlyingAmount,
-        uint256 fyTokenAmount
-    );
+    event ExitLeveragedLP(address indexed account, uint256 underlyingAmount, uint256 fyTokenAmount);
 }

@@ -307,7 +307,7 @@ contract RedemptionPool is
     struct ExitLeveragedLPLocalVars {
         MathError mathErr;
         uint256 fyTokenAmount;
-        uint256 underlyingAmount;
+        uint256 newTotalUnderlying;
         uint256 underlyingPrecisionScalar;
         // uint256 slippagePercentage;
         // uint256 underlyingAmountSlippage;
@@ -372,6 +372,18 @@ contract RedemptionPool is
 
         // bPool.exitPool(lpTokenAmount, minAmountsOut);
 
+        /**
+         * fyTokens always have 18 decimals so the underlying amount needs to be upscaled.
+         * If the precision scalar is 1, it means that the underlying also has 18 decimals.
+         */
+        vars.underlyingPrecisionScalar = fyToken.underlyingPrecisionScalar();
+        if (vars.underlyingPrecisionScalar != 1) {
+            (vars.mathErr, vars.fyTokenAmount) = mulUInt(underlyingAmount, vars.underlyingPrecisionScalar);
+            require(vars.mathErr == MathError.NO_ERROR, "ERR_EXIT_LEVERAGED_LP_MATH_ERROR");
+        } else {
+            vars.fyTokenAmount = underlyingAmount;
+        }
+
         // Absorb any tokens that may have been sent to the Balancer pool contract
         bPool.gulp(address(fyToken.underlying()));
         bPool.gulp(address(fyToken));
@@ -381,18 +393,29 @@ contract RedemptionPool is
             fyToken.underlying().balanceOf(address(bPool)),
             underlyingAmount
         );
-        require(vars.mathErr == MathError.NO_ERROR, "ERR_SUPPLY_UNDERLYING_FOR_LEVERAGED_LP_MATH_ERROR");
+        require(vars.mathErr == MathError.NO_ERROR, "ERR_EXIT_LEVERAGED_LP_MATH_ERROR");
 
         (vars.mathErr, vars.updatedFyTokenBalance) = subUInt(fyToken.balanceOf(address(bPool)), vars.fyTokenAmount);
-        require(vars.mathErr == MathError.NO_ERROR, "ERR_SUPPLY_UNDERLYING_FOR_LEVERAGED_LP_MATH_ERROR");
+        require(vars.mathErr == MathError.NO_ERROR, "ERR_EXIT_LEVERAGED_LP_MATH_ERROR");
 
         bPool.rebind(address(fyToken.underlying()), vars.updatedUnderlyingBalance, 25);
         bPool.rebind(address(fyToken), vars.updatedFyTokenBalance, 25);
 
-        // TODO: do stuff with the tokens taken out of the pool
-        // TODO: update the user's bookkeeping records
+        /* Interactions: burn the fyTokens. */
+        require(fyToken.burn(msg.sender, vars.fyTokenAmount), "ERR_EXIT_LEVERAGED_LP_CALL_BURN");
 
-        // emit ExitLeveragedLP(vars.lpTokenAmountOUT, vars.underlyingAmountOUT, vars.fyTokenAmountOUT);
+        /* Interactions: perform the Erc20 transfer. */
+        fyToken.underlying().safeTransferFrom(address(this), msg.sender, underlyingAmount);
+
+        /* Effects: update storage. */
+        (vars.mathErr, vars.newTotalUnderlying) = subUInt(
+            leveragedLPPositions[msg.sender].totalUnderlying,
+            underlyingAmount
+        );
+        require(vars.mathErr == MathError.NO_ERROR, "ERR_EXIT_LEVERAGED_LP_MATH_ERROR");
+        leveragedLPPositions[msg.sender].totalUnderlying = vars.newTotalUnderlying;
+
+        emit ExitLeveragedLP(msg.sender, underlyingAmount, vars.fyTokenAmount);
 
         return true;
     }
