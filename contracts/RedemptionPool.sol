@@ -182,7 +182,9 @@ contract RedemptionPool is
      * @return true = admin lock is now activated, otherwise false.
      */
     function setLeveragedLPAdminLock(bool newLock) external override onlyAdmin returns (bool) {
+        /* Effects: update storage. */
         isLeveragedLPAdminLocked = newLock;
+
         return isLeveragedLPAdminLocked;
     }
 
@@ -260,14 +262,20 @@ contract RedemptionPool is
 
         // vars.slippagePercentage = 10;
 
+        /* If the pool hasn't been initialized, initialize it before adding the new liquidity. */
         if (address(bPool) == address(0)) {
             // TODO: BFactory address should be inititalized somewhere
             BPoolInterface bp = BFactoryInterface(address(0x9424B1412450D0f8Fc2255FAf6046b98213B76Bd)).newBPool();
-            // Approve infinite allowances for balancer pool (unsafe)
+
+            /* Effects: approve infinite allowances for balancer pool (unsafe). */
             fyToken.underlying().approve(address(bp), uint256(-1));
             fyToken.approve(address(bp), uint256(-1));
+
+            /* Effects: set pool percentages (50/50) and supply the initial liquidity by providing token balances. */
             bp.bind(address(fyToken.underlying()), underlyingAmount, 25);
             bp.bind(address(fyToken), vars.fyTokenAmount, 25);
+
+            /* Effects: update storage. */
             bPool = bp;
         } else {
             // TODO: fix slippage handling
@@ -282,21 +290,30 @@ contract RedemptionPool is
 
             // bPool.joinPool(vars.fyTokenAmount, maxAmountsIn);
 
-            // Absorb any tokens that may have been sent to the Balancer pool contract
+            /* Effects: absorb any tokens that may have been sent to the Balancer pool contract. */
             bPool.gulp(address(fyToken.underlying()));
             bPool.gulp(address(fyToken));
 
+            /**
+             * calculate the updated fyToken balance (balance after liquidity is provided to Balancer pool).
+             */
             (vars.mathErr, vars.updatedUnderlyingBalance) = addUInt(
                 underlyingAmount,
                 fyToken.underlying().balanceOf(address(bPool))
             );
             require(vars.mathErr == MathError.NO_ERROR, "ERR_SUPPLY_UNDERLYING_FOR_LEVERAGED_LP_MATH_ERROR");
 
+            /**
+             * calculate the updated underlying balance (balance after liquidity is provided to Balancer pool).
+             */
             (vars.mathErr, vars.updatedFyTokenBalance) = addUInt(vars.fyTokenAmount, fyToken.balanceOf(address(bPool)));
             require(vars.mathErr == MathError.NO_ERROR, "ERR_SUPPLY_UNDERLYING_FOR_LEVERAGED_LP_MATH_ERROR");
 
+            /* Effects: set pool percentages (50/50) and supply more liquidity by providing updated balances. */
             bPool.rebind(address(fyToken.underlying()), vars.updatedUnderlyingBalance, 25);
             bPool.rebind(address(fyToken), vars.updatedFyTokenBalance, 25);
+
+            // NOTE: alternative to rebind, we could directly send tokens to pool and then call gulp on each
         }
 
         emit SupplyUnderlyingForLeveragedLP(msg.sender, underlyingAmount, vars.fyTokenAmount);
@@ -384,20 +401,27 @@ contract RedemptionPool is
             vars.fyTokenAmount = underlyingAmount;
         }
 
-        // Absorb any tokens that may have been sent to the Balancer pool contract
+        /* Effects: absorb any tokens that may have been sent to the Balancer pool contract. */
         bPool.gulp(address(fyToken.underlying()));
         bPool.gulp(address(fyToken));
 
         // TODO: handle cases of not enough fyTokens or underlying in the pool
+        /**
+         * calculate the updated fyToken balance (balance after liquidity is withdrawn from Balancer pool).
+         */
         (vars.mathErr, vars.updatedUnderlyingBalance) = subUInt(
             fyToken.underlying().balanceOf(address(bPool)),
             underlyingAmount
         );
         require(vars.mathErr == MathError.NO_ERROR, "ERR_EXIT_LEVERAGED_LP_MATH_ERROR");
 
+        /**
+         * calculate the updated underlying balance (balance after liquidity is withdrawn from Balancer pool).
+         */
         (vars.mathErr, vars.updatedFyTokenBalance) = subUInt(fyToken.balanceOf(address(bPool)), vars.fyTokenAmount);
         require(vars.mathErr == MathError.NO_ERROR, "ERR_EXIT_LEVERAGED_LP_MATH_ERROR");
 
+        /* Effects: set pool percentages (50/50) and partially withdraw liquidity by providing updated balances. */
         bPool.rebind(address(fyToken.underlying()), vars.updatedUnderlyingBalance, 25);
         bPool.rebind(address(fyToken), vars.updatedFyTokenBalance, 25);
 
