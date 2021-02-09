@@ -309,9 +309,11 @@ contract RedemptionPool is
         uint256 fyTokenAmount;
         uint256 underlyingAmount;
         uint256 underlyingPrecisionScalar;
-        uint256 slippagePercentage;
-        uint256 underlyingAmountSlippage;
-        uint256 fyTokenAmountSlippage;
+        // uint256 slippagePercentage;
+        // uint256 underlyingAmountSlippage;
+        // uint256 fyTokenAmountSlippage;
+        uint256 updatedFyTokenBalance;
+        uint256 updatedUnderlyingBalance;
     }
 
     /**
@@ -325,18 +327,21 @@ contract RedemptionPool is
      * - The amount to redeem cannot be larger that the sender's leveraged LP position.
      * - The Fintroller must allow this action to be performed.
      *
-     * @param lpTokenAmount The amount of underlying to redeem from the Redemption Pool.
+     * @param underlyingAmount The amount of underlying to redeem from the Redemption Pool.
      * @return true = success, otherwise it reverts.
      */
-    function exitLeveragedLP(uint256 lpTokenAmount) external override nonReentrant returns (bool) {
+    function exitLeveragedLP(uint256 underlyingAmount) external override nonReentrant returns (bool) {
         ExitLeveragedLPLocalVars memory vars;
-        vars.slippagePercentage = 10;
+        // vars.slippagePercentage = 10;
 
         /* Checks: the zero edge case. */
-        require(lpTokenAmount > 0, "EXIT_LEVERAGED_LP_ZERO");
+        require(underlyingAmount > 0, "EXIT_LEVERAGED_LP_ZERO");
 
         /* Checks: the zero edge case. */
-        require(lpTokenAmount <= leveragedLPPositions[msg.sender].totalUnderlying, "EXIT_LEVERAGED_LP_ABOVE_POSITION");
+        require(
+            underlyingAmount <= leveragedLPPositions[msg.sender].totalUnderlying,
+            "EXIT_LEVERAGED_LP_ABOVE_POSITION"
+        );
 
         /* Checks: the Fintroller allows this action to be performed. */
         // TODO: add fintroller rules
@@ -346,26 +351,43 @@ contract RedemptionPool is
          * fyTokens always have 18 decimals so the underlying amount needs to be upscaled.
          * If the precision scalar is 1, it means that the underlying also has 18 decimals.
          */
-        vars.fyTokenAmount = lpTokenAmount;
-        // TODO: fix to use lp token scalar precision instead.
-        vars.underlyingPrecisionScalar = fyToken.underlyingPrecisionScalar();
-        if (vars.underlyingPrecisionScalar != 1) {
-            (vars.mathErr, vars.underlyingAmount) = divUInt(lpTokenAmount, vars.underlyingPrecisionScalar);
-            require(vars.mathErr == MathError.NO_ERROR, "ERR_EXIT_LEVERAGED_LP_MATH_ERROR");
-        } else {
-            vars.underlyingAmount = lpTokenAmount;
-        }
+        // vars.fyTokenAmount = lpTokenAmount;
+        // // TODO: fix to use lp token scalar precision instead.
+        // vars.underlyingPrecisionScalar = fyToken.underlyingPrecisionScalar();
+        // if (vars.underlyingPrecisionScalar != 1) {
+        //     (vars.mathErr, vars.underlyingAmount) = divUInt(lpTokenAmount, vars.underlyingPrecisionScalar);
+        //     require(vars.mathErr == MathError.NO_ERROR, "ERR_EXIT_LEVERAGED_LP_MATH_ERROR");
+        // } else {
+        //     vars.underlyingAmount = lpTokenAmount;
+        // }
 
-        uint256[] memory minAmountsOut;
-        (vars.mathErr, vars.underlyingAmountSlippage) = divUInt(vars.underlyingAmount, vars.slippagePercentage);
-        require(vars.mathErr == MathError.NO_ERROR, "ERR_EXIT_LEVERAGED_LP_MATH_ERROR");
-        minAmountsOut[0] = vars.underlyingAmount - vars.underlyingAmountSlippage;
+        // uint256[] memory minAmountsOut;
+        // (vars.mathErr, vars.underlyingAmountSlippage) = divUInt(vars.underlyingAmount, vars.slippagePercentage);
+        // require(vars.mathErr == MathError.NO_ERROR, "ERR_EXIT_LEVERAGED_LP_MATH_ERROR");
+        // minAmountsOut[0] = vars.underlyingAmount - vars.underlyingAmountSlippage;
 
-        (vars.mathErr, vars.fyTokenAmountSlippage) = divUInt(vars.fyTokenAmount, vars.slippagePercentage);
-        require(vars.mathErr == MathError.NO_ERROR, "ERR_EXIT_LEVERAGED_LP_MATH_ERROR");
-        minAmountsOut[1] = vars.fyTokenAmount - vars.fyTokenAmountSlippage;
+        // (vars.mathErr, vars.fyTokenAmountSlippage) = divUInt(vars.fyTokenAmount, vars.slippagePercentage);
+        // require(vars.mathErr == MathError.NO_ERROR, "ERR_EXIT_LEVERAGED_LP_MATH_ERROR");
+        // minAmountsOut[1] = vars.fyTokenAmount - vars.fyTokenAmountSlippage;
 
-        bPool.exitPool(lpTokenAmount, minAmountsOut);
+        // bPool.exitPool(lpTokenAmount, minAmountsOut);
+
+        // Absorb any tokens that may have been sent to the Balancer pool contract
+        bPool.gulp(address(fyToken.underlying()));
+        bPool.gulp(address(fyToken));
+
+        // TODO: handle cases of not enough fyTokens or underlying in the pool
+        (vars.mathErr, vars.updatedUnderlyingBalance) = subUInt(
+            fyToken.underlying().balanceOf(address(bPool)),
+            underlyingAmount
+        );
+        require(vars.mathErr == MathError.NO_ERROR, "ERR_SUPPLY_UNDERLYING_FOR_LEVERAGED_LP_MATH_ERROR");
+
+        (vars.mathErr, vars.updatedFyTokenBalance) = subUInt(fyToken.balanceOf(address(bPool)), vars.fyTokenAmount);
+        require(vars.mathErr == MathError.NO_ERROR, "ERR_SUPPLY_UNDERLYING_FOR_LEVERAGED_LP_MATH_ERROR");
+
+        bPool.rebind(address(fyToken.underlying()), vars.updatedUnderlyingBalance, 25);
+        bPool.rebind(address(fyToken), vars.updatedFyTokenBalance, 25);
 
         // TODO: do stuff with the tokens taken out of the pool
         // TODO: update the user's bookkeeping records
