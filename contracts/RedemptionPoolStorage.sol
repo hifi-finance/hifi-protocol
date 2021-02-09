@@ -3,7 +3,6 @@ pragma solidity ^0.7.0;
 
 import "./FintrollerInterface.sol";
 import "./FyTokenInterface.sol";
-import "./external/balancer/BPoolInterface.sol";
 
 /**
  * @title RedemptionPoolStorage
@@ -29,23 +28,4 @@ abstract contract RedemptionPoolStorage {
      * @notice Indicator that this is a Redemption Pool contract, for inspection.
      */
     bool public constant isRedemptionPool = true;
-
-    /**
-     * @notice Indicator that calling the leveraged LP functionality is exclusive to RedemptionPool admin.
-     */
-    bool public isLeveragedLPAdminLocked = true;
-
-    struct LeveragedLPPosition {
-        uint256 totalUnderlying;
-    }
-
-    /**
-     * @notice The Balancer pool for `underlying:fyToken` pair.
-     */
-    BPoolInterface public bPool;
-
-    /**
-     * @notice Bookkeeping to keep track of all leveraged LP providers and how much underlying tokens each has provided.
-     */
-    mapping(address => LeveragedLPPosition) public leveragedLPPositions;
 }
