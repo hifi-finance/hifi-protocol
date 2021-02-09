@@ -7,6 +7,7 @@ import { Fintroller } from "../../typechain/Fintroller";
 import { GodModeBalanceSheet } from "../../typechain/GodModeBalanceSheet";
 import { GodModeFyToken } from "../../typechain/GodModeFyToken";
 import { GodModeRedemptionPool } from "../../typechain/GodModeRedemptionPool";
+import { CTokenPriceFeed } from "../../typechain/CTokenPriceFeed";
 
 import {
   deployChainlinkOperator,
@@ -14,6 +15,7 @@ import {
   deployGodModeBalanceSheet,
   deployGodModeFyToken,
   deployGodModeRedemptionPool,
+  deployCTokenPriceFeed,
 } from "../deployers";
 import {
   deployStubBalanceSheet,
@@ -24,8 +26,31 @@ import {
   deployStubRedemptionPool,
   deployStubFyToken,
   deployStubUnderlying,
+  deployStubCToken,
 } from "./stubs";
 import { fyTokenConstants } from "../../helpers/constants";
+
+type UnitFixtureCTokenPriceFeedReturnType = {
+  cTokenPriceFeed: CTokenPriceFeed;
+  collateralPriceFeed: MockContract;
+  cToken: MockContract;
+}
+
+export async function unitFixtureCTokenPriceFeed(signers: Signer[]): Promise<UnitFixtureCTokenPriceFeedReturnType> {
+  const deployer: Signer = signers[0];
+
+  const cToken: MockContract = await deployStubCToken(deployer);
+  const collateralPriceFeed: MockContract = await deployStubCollateralPriceFeed(deployer);
+
+  const cTokenPriceFeed: CTokenPriceFeed = await deployCTokenPriceFeed(
+    deployer,
+    'cWBTC/USD',
+    cToken.address,
+    collateralPriceFeed.address,
+  );
+
+  return { cTokenPriceFeed, collateralPriceFeed, cToken };
+}
 
 type UnitFixtureBalanceSheetReturnType = {
   balanceSheet: GodModeBalanceSheet;

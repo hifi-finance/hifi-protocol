@@ -41,6 +41,7 @@ export const prices: { [name: string]: BigNumber } = {
   oneDollar: ten.pow(chainlinkPricePrecision),
   twelveDollars: ten.pow(chainlinkPricePrecision).mul(12),
   oneHundredDollars: ten.pow(chainlinkPricePrecision).mul(100),
+  oneThousandDollars: ten.pow(chainlinkPricePrecision).mul(1000),
 };
 
 /* These amounts assume that the token has 18 decimals. */

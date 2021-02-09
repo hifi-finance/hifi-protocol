@@ -12,6 +12,7 @@ import { GodModeBalanceSheet } from "../typechain/GodModeBalanceSheet";
 import { GodModeRedemptionPool } from "../typechain/GodModeRedemptionPool";
 import { GodModeFyToken } from "../typechain/GodModeFyToken";
 import { SimplePriceFeed } from "../typechain/SimplePriceFeed";
+import { CTokenPriceFeed } from "../typechain/CTokenPriceFeed";
 import { fyTokenConstants, gasLimits, prices } from "../helpers/constants";
 
 const overrideOptions: TransactionRequest = {
@@ -78,6 +79,28 @@ export async function deployFyToken(
     )
   );
   return fyToken;
+}
+
+export async function deployCTokenPriceFeed(
+  deployer: Signer,
+  description: string,
+  cToken: string,
+  priceFeed: string,
+): Promise<CTokenPriceFeed> {
+  const cTokenPriceFeedArtifact: Artifact = await hre.artifacts.readArtifact("CTokenPriceFeed");
+  const cTokenPriceFeed: CTokenPriceFeed = <CTokenPriceFeed>(
+    await deployContract(
+      deployer,
+      cTokenPriceFeedArtifact,
+      [
+        description,
+        cToken,
+        priceFeed,
+      ],
+      overrideOptions,
+    )
+  );
+  return cTokenPriceFeed;
 }
 
 export async function deployGodModeBalanceSheet(

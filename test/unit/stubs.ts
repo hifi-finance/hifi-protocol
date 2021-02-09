@@ -55,6 +55,15 @@ export async function deployStubErc20(
   return erc20;
 }
 
+export async function deployStubCToken(
+  deployer: Signer
+): Promise<MockContract> {
+  const cTokenArtifact: Artifact = await hre.artifacts.readArtifact("FakeCToken");
+  const ctoken: MockContract = await deployStubContract(deployer, cTokenArtifact.abi);
+  // await ctoken.mock.exchangeRateStored.returns(BigNumber.from('2'));
+  return ctoken;
+}
+
 export async function deployStubFintroller(deployer: Signer): Promise<MockContract> {
   const fintrollerArtifact: Artifact = await hre.artifacts.readArtifact("Fintroller");
   const fintroller: MockContract = await deployStubContract(deployer, fintrollerArtifact.abi);
