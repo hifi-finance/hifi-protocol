@@ -191,9 +191,11 @@ contract RedemptionPool is
         uint256 fyTokenAmount;
         uint256 newTotalUnderlying;
         uint256 underlyingPrecisionScalar;
-        uint256 slippagePercentage;
-        uint256 underlyingAmountSlippage;
-        uint256 fyTokenAmountSlippage;
+        // uint256 slippagePercentage;
+        // uint256 underlyingAmountSlippage;
+        // uint256 fyTokenAmountSlippage;
+        uint256 updatedFyTokenBalance;
+        uint256 updatedUnderlyingBalance;
     }
 
     /**
@@ -256,7 +258,7 @@ contract RedemptionPool is
         /* Interactions: perform the Erc20 transfer. */
         fyToken.underlying().safeTransferFrom(msg.sender, address(this), underlyingAmount);
 
-        vars.slippagePercentage = 10;
+        // vars.slippagePercentage = 10;
 
         if (address(bPool) == address(0)) {
             // TODO: BFactory address should be inititalized somewhere
@@ -269,16 +271,32 @@ contract RedemptionPool is
             bPool = bp;
         } else {
             // TODO: fix slippage handling
-            uint256[] memory maxAmountsIn;
-            (vars.mathErr, vars.underlyingAmountSlippage) = divUInt(underlyingAmount, vars.slippagePercentage);
-            require(vars.mathErr == MathError.NO_ERROR, "ERR_SYNC_BPOOL_MATH_ERROR");
-            maxAmountsIn[0] = underlyingAmount + vars.underlyingAmountSlippage;
+            // uint256[] memory maxAmountsIn;
+            // (vars.mathErr, vars.underlyingAmountSlippage) = divUInt(underlyingAmount, vars.slippagePercentage);
+            // require(vars.mathErr == MathError.NO_ERROR, "ERR_SYNC_BPOOL_MATH_ERROR");
+            // maxAmountsIn[0] = underlyingAmount + vars.underlyingAmountSlippage;
 
-            (vars.mathErr, vars.fyTokenAmountSlippage) = divUInt(vars.fyTokenAmount, vars.slippagePercentage);
-            require(vars.mathErr == MathError.NO_ERROR, "ERR_SYNC_BPOOL_MATH_ERROR");
-            maxAmountsIn[1] = vars.fyTokenAmount + vars.fyTokenAmountSlippage;
+            // (vars.mathErr, vars.fyTokenAmountSlippage) = divUInt(vars.fyTokenAmount, vars.slippagePercentage);
+            // require(vars.mathErr == MathError.NO_ERROR, "ERR_SYNC_BPOOL_MATH_ERROR");
+            // maxAmountsIn[1] = vars.fyTokenAmount + vars.fyTokenAmountSlippage;
 
-            bPool.joinPool(vars.fyTokenAmount, maxAmountsIn);
+            // bPool.joinPool(vars.fyTokenAmount, maxAmountsIn);
+
+            // Absorb any tokens that may have been sent to the Balancer pool contract
+            bPool.gulp(address(fyToken.underlying()));
+            bPool.gulp(address(fyToken));
+
+            (vars.mathErr, vars.updatedUnderlyingBalance) = addUInt(
+                underlyingAmount,
+                fyToken.underlying().balanceOf(address(bPool))
+            );
+            require(vars.mathErr == MathError.NO_ERROR, "ERR_SUPPLY_UNDERLYING_FOR_LEVERAGED_LP_MATH_ERROR");
+
+            (vars.mathErr, vars.updatedFyTokenBalance) = addUInt(vars.fyTokenAmount, fyToken.balanceOf(address(bPool)));
+            require(vars.mathErr == MathError.NO_ERROR, "ERR_SUPPLY_UNDERLYING_FOR_LEVERAGED_LP_MATH_ERROR");
+
+            bPool.rebind(address(fyToken.underlying()), vars.updatedUnderlyingBalance, 25);
+            bPool.rebind(address(fyToken), vars.updatedFyTokenBalance, 25);
         }
 
         emit SupplyUnderlyingForLeveragedLP(msg.sender, underlyingAmount, vars.fyTokenAmount);
