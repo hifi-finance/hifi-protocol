@@ -126,8 +126,7 @@ contract BAMMController is
 
         /* If the pool hasn't been created, create and initialize it before adding the new liquidity. */
         if (address(bPool) == address(0)) {
-            // TODO: BFactory address should be inititalized somewhere
-            BPoolInterface bp = BFactoryInterface(address(0x9424B1412450D0f8Fc2255FAf6046b98213B76Bd)).newBPool();
+            BPoolInterface bp = BFactoryInterface(BFACTORY_ADDRESS).newBPool();
 
             /* Effects: approve infinite allowances for balancer pool (unsafe). */
             fyToken.underlying().approve(address(bp), uint256(-1));

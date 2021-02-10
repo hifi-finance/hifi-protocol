@@ -37,4 +37,10 @@ abstract contract BAMMControllerStorage {
      * @notice Bookkeeping to keep track of all liquidity providers and how much underlying tokens each has provided.
      */
     mapping(address => Position) public positions;
+
+    /**
+     * @notice The Balancer Factory contract.
+     * @dev This is the mainnet version of the Balancer Factory. Change it with the testnet version when needed.
+     */
+    address public constant BFACTORY_ADDRESS = 0x9424B1412450D0f8Fc2255FAf6046b98213B76Bd;
 }
