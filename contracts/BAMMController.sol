@@ -132,7 +132,7 @@ contract BAMMController is
             fyToken.underlying().approve(address(bp), uint256(-1));
             fyToken.approve(address(bp), uint256(-1));
 
-            /* Effects: set pool percentages (50/50) and supply the initial liquidity by providing token balances. */
+            /* Effects: set pool weights (50/50) and supply the initial liquidity by providing token balances. */
             bp.bind(address(fyToken.underlying()), underlyingAmount, 25);
             bp.bind(address(fyToken), vars.fyTokenAmount, 25);
 
@@ -148,7 +148,7 @@ contract BAMMController is
             bPool.gulp(address(fyToken));
 
             /**
-             * calculate the updated fyToken balance (balance after liquidity is provided to Balancer pool).
+             * calculate the updated underlying balance (balance after liquidity is provided to Balancer pool).
              */
             (vars.mathErr, vars.updatedUnderlyingBalance) = addUInt(
                 underlyingAmount,
@@ -157,7 +157,7 @@ contract BAMMController is
             require(vars.mathErr == MathError.NO_ERROR, "ERR_INJECT_LIQUIDITY_MATH_ERROR");
 
             /**
-             * calculate the updated underlying balance (balance after liquidity is provided to Balancer pool).
+             * calculate the updated fyToken balance (balance after liquidity is provided to Balancer pool).
              */
             (vars.mathErr, vars.updatedFyTokenBalance) = addUInt(
                 vars.fyTokenAmount,
@@ -232,7 +232,7 @@ contract BAMMController is
 
         // TODO: handle cases of not enough fyTokens or underlying in the pool
         /**
-         * calculate the updated fyToken balance (balance after liquidity is withdrawn from Balancer pool).
+         * calculate the updated underlying balance (balance after liquidity is withdrawn from Balancer pool).
          */
         (vars.mathErr, vars.updatedUnderlyingBalance) = subUInt(
             bPool.getBalance(address(fyToken.underlying())),
@@ -241,7 +241,7 @@ contract BAMMController is
         require(vars.mathErr == MathError.NO_ERROR, "ERR_EXTRACT_LIQUIDITY_MATH_ERROR");
 
         /**
-         * calculate the updated underlying balance (balance after liquidity is withdrawn from Balancer pool).
+         * calculate the updated fyToken balance (balance after liquidity is withdrawn from Balancer pool).
          */
         (vars.mathErr, vars.updatedFyTokenBalance) = subUInt(bPool.getBalance(address(fyToken)), vars.fyTokenAmount);
         require(vars.mathErr == MathError.NO_ERROR, "ERR_EXTRACT_LIQUIDITY_MATH_ERROR");
