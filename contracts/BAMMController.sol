@@ -246,9 +246,13 @@ contract BAMMController is
         (vars.mathErr, vars.updatedFyTokenBalance) = subUInt(bPool.getBalance(address(fyToken)), vars.fyTokenAmount);
         require(vars.mathErr == MathError.NO_ERROR, "ERR_EXTRACT_LIQUIDITY_MATH_ERROR");
 
-        /* Effects: set pool percentages (50/50) and partially withdraw liquidity by providing updated balances. */
-        bPool.rebind(address(fyToken.underlying()), vars.updatedUnderlyingBalance, 25);
-        bPool.rebind(address(fyToken), vars.updatedFyTokenBalance, 25);
+        /* Effects: partially withdraw liquidity by providing updated balances. */
+        bPool.rebind(
+            address(fyToken.underlying()),
+            vars.updatedUnderlyingBalance,
+            bPool.getDenormalizedWeight(address(fyToken.underlying()))
+        );
+        bPool.rebind(address(fyToken), vars.updatedFyTokenBalance, bPool.getDenormalizedWeight(address(fyToken)));
 
         /* Interactions: burn the fyTokens. */
         require(fyToken.burn(address(this), vars.fyTokenAmount), "ERR_EXTRACT_LIQUIDITY_CALL_BURN");
