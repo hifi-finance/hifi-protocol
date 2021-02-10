@@ -13,6 +13,7 @@ import "./BalanceSheetInterface.sol";
 import "./FintrollerInterface.sol";
 import "./FyTokenInterface.sol";
 import "./RedemptionPool.sol";
+import "./BAMMController.sol";
 
 /**
  * @title FyToken
@@ -84,6 +85,10 @@ contract FyToken is
         /* Create the Redemption Pool contract and transfer the owner from the fyToken itself to the current caller. */
         redemptionPool = new RedemptionPool(fintroller_, this);
         AdminInterface(address(redemptionPool))._transferAdmin(msg.sender);
+
+        /* Create the Balancer AMM Controller contract and transfer the owner to the current caller. */
+        bAMMController = new BAMMController(this);
+        AdminInterface(address(bAMMController))._transferAdmin(msg.sender);
     }
 
     /**
@@ -191,7 +196,7 @@ contract FyToken is
      * Requirements:
      *
      * - Must be called prior to maturation.
-     * - Can only be called by the Redemption Pool.
+     * - Can only be called by the Redemption Pool and Balancer AMM Controller.
      * - The amount to burn cannot be zero.
      *
      * @param holder The account whose fyTokens to burn.
@@ -199,8 +204,11 @@ contract FyToken is
      * @return bool true = success, otherwise it reverts.
      */
     function burn(address holder, uint256 burnAmount) external override nonReentrant returns (bool) {
-        /* Checks: the caller is the Redemption Pool. */
-        require(msg.sender == address(redemptionPool), "ERR_BURN_NOT_AUTHORIZED");
+        /* Checks: the caller is the Redemption Pool or Balancer AMM Controller. */
+        require(
+            msg.sender == address(redemptionPool) || msg.sender == address(bAMMController),
+            "ERR_BURN_NOT_AUTHORIZED"
+        );
 
         /* Checks: the zero edge case. */
         require(burnAmount > 0, "ERR_BURN_ZERO");
@@ -289,7 +297,7 @@ contract FyToken is
      *
      * Requirements:
      *
-     * - Can only be called by the Redemption Pool.
+     * - Can only be called by the Redemption Pool and Balancer AMM Controller.
      * - The amount to mint cannot be zero.
      *
      * @param beneficiary The borrower account for which to mint the tokens.
@@ -297,8 +305,11 @@ contract FyToken is
      * @return bool true = success, otherwise it reverts.
      */
     function mint(address beneficiary, uint256 mintAmount) external override nonReentrant returns (bool) {
-        /* Checks: the caller is the Redemption Pool. */
-        require(msg.sender == address(redemptionPool), "ERR_MINT_NOT_AUTHORIZED");
+        /* Checks: the caller is the Redemption Pool or Balancer AMM Controller. */
+        require(
+            msg.sender == address(redemptionPool) || msg.sender == address(bAMMController),
+            "ERR_MINT_NOT_AUTHORIZED"
+        );
 
         /* Checks: the zero edge case. */
         require(mintAmount > 0, "ERR_MINT_ZERO");

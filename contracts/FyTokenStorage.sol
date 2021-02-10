@@ -5,6 +5,7 @@ import "@paulrberg/contracts/token/erc20/Erc20Interface.sol";
 import "./BalanceSheetInterface.sol";
 import "./FintrollerInterface.sol";
 import "./RedemptionPoolInterface.sol";
+import "./BAMMControllerInterface.sol";
 
 /**
  * @title FyTokenStorage
@@ -44,6 +45,11 @@ abstract contract FyTokenStorage {
      * @notice The unique Redemption Pool associated with this contract.
      */
     RedemptionPoolInterface public redemptionPool;
+
+    /**
+     * @notice The unique Balancer AMM Controller associated with this contract.
+     */
+    BAMMControllerInterface public bAMMController;
 
     /**
      * @notice The Erc20 underlying, or target, asset for this fyToken.
