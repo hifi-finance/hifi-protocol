@@ -129,8 +129,8 @@ contract BAMMController is
             BPoolInterface bp = BFactoryInterface(BFACTORY_ADDRESS).newBPool();
 
             /* Effects: approve infinite allowances for balancer pool (unsafe). */
-            fyToken.underlying().approve(address(bp), uint256(-1));
-            fyToken.approve(address(bp), uint256(-1));
+            fyToken.underlying().approve(address(bp), type(uint256).max);
+            fyToken.approve(address(bp), type(uint256).max);
 
             /* Effects: set pool weights (50/50) and supply the initial liquidity by providing token balances. */
             bp.bind(address(fyToken.underlying()), underlyingAmount, 25);
