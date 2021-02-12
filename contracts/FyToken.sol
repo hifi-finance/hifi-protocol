@@ -87,7 +87,7 @@ contract FyToken is
         AdminInterface(address(redemptionPool))._transferAdmin(msg.sender);
 
         /* Create the Balancer AMM Controller contract and transfer the owner to the current caller. */
-        bAMMController = new BAMMController(this);
+        bAMMController = new BAMMController(this, redemptionPool);
         AdminInterface(address(bAMMController))._transferAdmin(msg.sender);
     }
 

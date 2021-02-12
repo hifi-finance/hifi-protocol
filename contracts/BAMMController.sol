@@ -38,12 +38,14 @@ contract BAMMController is
     /**
      * @param fyToken_ The address of the fyToken contract.
      */
-    constructor(FyTokenInterface fyToken_) Admin() {
+    constructor(FyTokenInterface fyToken_, RedemptionPoolInterface redemptionPool_) Admin() {
         /**
          * Set the fyToken contract. It cannot be sanity-checked because the fyToken creates this
          * contract in its own constructor and contracts cannot be called while initializing.
          */
         fyToken = fyToken_;
+
+        redemptionPool = redemptionPool_;
     }
 
     /**
@@ -133,8 +135,8 @@ contract BAMMController is
             fyToken.approve(address(bp), type(uint256).max);
 
             /* Effects: set pool weights (50/50) and supply the initial liquidity by providing token balances. */
-            bp.bind(address(fyToken.underlying()), underlyingAmount, 25);
-            bp.bind(address(fyToken), vars.fyTokenAmount, 25);
+            bp.bind(address(fyToken.underlying()), underlyingAmount, 25000000000000000000);
+            bp.bind(address(fyToken), vars.fyTokenAmount, 25000000000000000000);
 
             /* Effects: enable public swap. */
             bp.setPublicSwap(true);
@@ -184,6 +186,10 @@ contract BAMMController is
     struct ExtractLiquidityLocalVars {
         MathError mathErr;
         uint256 fyTokenAmount;
+        uint256 fyTokenAmountReal;
+        uint256 fyTokenAmountRepay;
+        uint256 underlyingAmountReal;
+        uint256 underlyingAmountBurn;
         uint256 newTotalUnderlying;
         uint256 underlyingPrecisionScalar;
         uint256 updatedUnderlyingBalance;
@@ -230,7 +236,6 @@ contract BAMMController is
         bPool.gulp(address(fyToken.underlying()));
         bPool.gulp(address(fyToken));
 
-        // TODO: handle cases of not enough fyTokens or underlying in the pool
         /**
          * calculate the updated underlying balance (balance after liquidity is withdrawn from Balancer pool).
          */
@@ -238,13 +243,38 @@ contract BAMMController is
             bPool.getBalance(address(fyToken.underlying())),
             underlyingAmount
         );
-        require(vars.mathErr == MathError.NO_ERROR, "ERR_EXTRACT_LIQUIDITY_MATH_ERROR");
+        if (vars.mathErr == MathError.NO_ERROR) {
+            vars.underlyingAmountReal = underlyingAmount;
+        } else {
+            vars.updatedUnderlyingBalance = 0;
+            vars.underlyingAmountReal = bPool.getBalance(address(fyToken.underlying()));
+
+            (vars.mathErr, vars.fyTokenAmountRepay) = subUInt(underlyingAmount, vars.underlyingAmountReal);
+            require(vars.mathErr == MathError.NO_ERROR, "ERR_EXTRACT_LIQUIDITY_MATH_ERROR");
+
+            (vars.mathErr, vars.fyTokenAmountRepay) = mulUInt(vars.fyTokenAmountRepay, vars.underlyingPrecisionScalar);
+            require(vars.mathErr == MathError.NO_ERROR, "ERR_EXTRACT_LIQUIDITY_MATH_ERROR");
+        }
 
         /**
          * calculate the updated fyToken balance (balance after liquidity is withdrawn from Balancer pool).
          */
         (vars.mathErr, vars.updatedFyTokenBalance) = subUInt(bPool.getBalance(address(fyToken)), vars.fyTokenAmount);
-        require(vars.mathErr == MathError.NO_ERROR, "ERR_EXTRACT_LIQUIDITY_MATH_ERROR");
+        if (vars.mathErr == MathError.NO_ERROR) {
+            vars.fyTokenAmountReal = vars.fyTokenAmount;
+        } else {
+            vars.updatedFyTokenBalance = 0;
+            vars.fyTokenAmountReal = bPool.getBalance(address(fyToken));
+
+            (vars.mathErr, vars.underlyingAmountBurn) = subUInt(vars.fyTokenAmount, vars.fyTokenAmountReal);
+            require(vars.mathErr == MathError.NO_ERROR, "ERR_EXTRACT_LIQUIDITY_MATH_ERROR");
+
+            (vars.mathErr, vars.underlyingAmountBurn) = divUInt(
+                vars.underlyingAmountBurn,
+                vars.underlyingPrecisionScalar
+            );
+            require(vars.mathErr == MathError.NO_ERROR, "ERR_EXTRACT_LIQUIDITY_MATH_ERROR");
+        }
 
         /* Effects: partially withdraw liquidity by providing updated balances. */
         bPool.rebind(
@@ -254,18 +284,26 @@ contract BAMMController is
         );
         bPool.rebind(address(fyToken), vars.updatedFyTokenBalance, bPool.getDenormalizedWeight(address(fyToken)));
 
-        /* Interactions: burn the fyTokens. */
-        require(fyToken.burn(address(this), vars.fyTokenAmount), "ERR_EXTRACT_LIQUIDITY_CALL_BURN");
-
         /* Interactions: perform the Erc20 transfer. */
-        fyToken.underlying().safeTransfer(msg.sender, underlyingAmount);
+        fyToken.underlying().safeTransfer(msg.sender, vars.underlyingAmountReal);
+
+        if (vars.fyTokenAmountRepay > 0) {
+            fyToken.transfer(msg.sender, vars.fyTokenAmountRepay);
+        }
+
+        /* Interactions: burn the fyTokens. */
+        require(fyToken.burn(address(this), vars.fyTokenAmountReal), "ERR_EXTRACT_LIQUIDITY_CALL_BURN");
+
+        if (vars.underlyingAmountBurn > 0) {
+            fyToken.underlying().safeTransfer(address(redemptionPool), vars.underlyingAmountBurn);
+        }
 
         /* Effects: update storage. */
         (vars.mathErr, vars.newTotalUnderlying) = subUInt(positions[msg.sender].totalUnderlying, underlyingAmount);
         require(vars.mathErr == MathError.NO_ERROR, "ERR_EXTRACT_LIQUIDITY_MATH_ERROR");
         positions[msg.sender].totalUnderlying = vars.newTotalUnderlying;
 
-        emit ExtractLiquidity(msg.sender, underlyingAmount, vars.fyTokenAmount);
+        // emit ExtractLiquidity(msg.sender, underlyingAmount, vars.fyTokenAmount);
 
         return true;
     }

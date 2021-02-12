@@ -15,6 +15,11 @@ abstract contract BAMMControllerStorage {
     FyTokenInterface public fyToken;
 
     /**
+     * The Redemption Pool.
+     */
+    RedemptionPoolInterface public redemptionPool;
+
+    /**
      * @notice Indicator that this is a Balancer AMM Controller contract, for inspection.
      */
     bool public constant isBAMMController = true;
