@@ -70,8 +70,8 @@ contract UniswapV2PairPriceFeed is AggregatorV3Interface, CarefulMath {
         uint256 divisor;
         uint256 r0;
         uint256 r1;
-        uint256 r0r1;
-        uint256 sqrtR0R1;
+        uint256 k;
+        uint256 sqrtK;
         int256 p0;
         int256 p1;
         uint256 p0p1;
@@ -101,17 +101,17 @@ contract UniswapV2PairPriceFeed is AggregatorV3Interface, CarefulMath {
         (, vars.p0, , , ) = token0Oracle.latestRoundData();
         (, vars.p1, , , ) = token1Oracle.latestRoundData();
 
-        (vars.mathErr, vars.r0r1) = mulUInt(vars.r0, vars.r1);
+        (vars.mathErr, vars.k) = mulUInt(vars.r0, vars.r1);
         require(vars.mathErr == MathError.NO_ERROR, "ERR_LATEST_ROUND_DATA_MATH_ERROR");
 
-        vars.sqrtR0R1 = Math.sqrt(vars.r0r1);
+        vars.sqrtK = Math.sqrt(vars.k);
 
         (vars.mathErr, vars.p0p1) = mulUInt(uint256(vars.p0), uint256(vars.p1));
         require(vars.mathErr == MathError.NO_ERROR, "ERR_LATEST_ROUND_DATA_MATH_ERROR");
 
         vars.sqrtP0P1 = Math.sqrt(vars.p0p1);
 
-        (vars.mathErr, vars.sqrtR0R1sqrtP0P1) = mulUInt(vars.sqrtR0R1, vars.sqrtP0P1);
+        (vars.mathErr, vars.sqrtR0R1sqrtP0P1) = mulUInt(vars.sqrtK, vars.sqrtP0P1);
         require(vars.mathErr == MathError.NO_ERROR, "ERR_LATEST_ROUND_DATA_MATH_ERROR");
 
         (vars.mathErr, vars.dividend) = mulUInt(vars.sqrtR0R1sqrtP0P1, 2);
