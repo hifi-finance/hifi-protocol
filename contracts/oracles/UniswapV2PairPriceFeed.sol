@@ -3,6 +3,7 @@ pragma solidity ^0.7.0;
 
 /*
     Inspired by Alpha Finance's Fair Uniswap's LP Token Pricing
+    https://blog.alphafinance.io/fair-lp-token-pricing
     https://github.com/AlphaFinanceLab/homora-v2/blob/master/contracts/oracle/UniswapV2Oracle.sol
 */
 
