@@ -15,26 +15,28 @@ import "../external/chainlink/AggregatorV3Interface.sol";
 /**
  * @title UniswapV2PairPriceFeed
  * @author Hifi
+ * @notice Chainlink-interfaced Uniswap LP token price feed.
  */
 contract UniswapV2PairPriceFeed is AggregatorV3Interface, CarefulMath {
     string internal internalDescription;
 
-    // UniswapV2Pair
+    /**
+     * @notice The Uniswap pair contract.
+     */
     UniswapV2PairInterface public pair;
 
-    // ETH-quoted Chainlink oracles
-    AggregatorV3Interface public token0Oracle;
-    AggregatorV3Interface public token1Oracle;
+    /**
+     * @notice ETH-quoted Chainlink oracles for underlying paired assets.
+     */
+    AggregatorV3Interface[] public underlyingOracles;
 
     constructor(
         UniswapV2PairInterface pair_,
-        AggregatorV3Interface token0Oracle_,
-        AggregatorV3Interface token1Oracle_,
+        AggregatorV3Interface[] memory underlyingOracles_,
         string memory description_
     ) {
         pair = pair_;
-        token0Oracle = token0Oracle_;
-        token1Oracle = token1Oracle_;
+        underlyingOracles = underlyingOracles_;
         internalDescription = description_;
     }
 
@@ -63,10 +65,25 @@ contract UniswapV2PairPriceFeed is AggregatorV3Interface, CarefulMath {
         )
     {
         require(_roundId == 0, "ERR_GET_ROUND_DATA_NO_HISTORIC_ROUNDS");
-        return this.latestRoundData();
+        return (0, getPriceInternal(), block.timestamp, block.timestamp, 0);
     }
 
-    struct LatestRoundDataLocalVars {
+    function latestRoundData()
+        external
+        view
+        override
+        returns (
+            uint80 roundId,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        )
+    {
+        return (0, getPriceInternal(), block.timestamp, block.timestamp, 0);
+    }
+
+    struct GetPriceInternalLocalVars {
         MathError mathErr;
         uint256 divisor;
         uint256 r0;
@@ -82,25 +99,18 @@ contract UniswapV2PairPriceFeed is AggregatorV3Interface, CarefulMath {
         uint256 price;
     }
 
-    function latestRoundData()
-        external
-        view
-        override
-        returns (
-            uint80 roundId,
-            int256 answer,
-            uint256 startedAt,
-            uint256 updatedAt,
-            uint80 answeredInRound
-        )
-    {
-        LatestRoundDataLocalVars memory vars;
+    /**
+     * @notice Get the latest price of the LP token.
+     * @return The price of the LP token quoted in ETH (18 decimals).
+     */
+    function getPriceInternal() internal view returns (int256) {
+        GetPriceInternalLocalVars memory vars;
 
-        vars.divisor = UniswapV2PairInterface(pair).totalSupply();
-        (vars.r0, vars.r1, ) = UniswapV2PairInterface(pair).getReserves();
+        vars.divisor = pair.totalSupply();
+        (vars.r0, vars.r1, ) = pair.getReserves();
 
-        (, vars.p0, , , ) = token0Oracle.latestRoundData();
-        (, vars.p1, , , ) = token1Oracle.latestRoundData();
+        (, vars.p0, , , ) = underlyingOracles[0].latestRoundData();
+        (, vars.p1, , , ) = underlyingOracles[1].latestRoundData();
 
         (vars.mathErr, vars.k) = mulUInt(vars.r0, vars.r1);
         require(vars.mathErr == MathError.NO_ERROR, "ERR_LATEST_ROUND_DATA_MATH_ERROR");
@@ -121,6 +131,6 @@ contract UniswapV2PairPriceFeed is AggregatorV3Interface, CarefulMath {
         (vars.mathErr, vars.price) = divUInt(vars.dividend, vars.divisor);
         require(vars.mathErr == MathError.NO_ERROR, "ERR_LATEST_ROUND_DATA_MATH_ERROR");
 
-        return (0, int256(vars.price), 0, block.timestamp, 0);
+        return int256(vars.price);
     }
 }
