@@ -26,22 +26,22 @@ contract UniswapV2PairPriceFeed is AggregatorV3Interface, CarefulMath {
     UniswapV2PairInterface public pair;
 
     /**
-     * @notice ETH-quoted Chainlink oracles for underlying paired assets.
+     * @notice USD-quoted Chainlink oracles for underlying paired assets.
      */
     AggregatorV3Interface[] public underlyingOracles;
 
     constructor(
+        string memory description_,
         UniswapV2PairInterface pair_,
-        AggregatorV3Interface[] memory underlyingOracles_,
-        string memory description_
+        AggregatorV3Interface[] memory underlyingOracles_
     ) {
+        internalDescription = description_;
         pair = pair_;
         underlyingOracles = underlyingOracles_;
-        internalDescription = description_;
     }
 
     function decimals() external pure override returns (uint8) {
-        return 18;
+        return 8;
     }
 
     function description() external view override returns (string memory) {
@@ -101,7 +101,7 @@ contract UniswapV2PairPriceFeed is AggregatorV3Interface, CarefulMath {
 
     /**
      * @notice Get the latest price of the LP token.
-     * @return The price of the LP token quoted in ETH (18 decimals).
+     * @return The price of the LP token quoted in USD (8 decimals).
      */
     function getPriceInternal() internal view returns (int256) {
         GetPriceInternalLocalVars memory vars;
