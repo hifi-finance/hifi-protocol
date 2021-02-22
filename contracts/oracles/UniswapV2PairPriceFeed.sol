@@ -50,7 +50,7 @@ contract UniswapV2PairPriceFeed is AggregatorV3Interface, CarefulMath {
         return 1;
     }
 
-    function getRoundData(uint80)
+    function getRoundData(uint80 _roundId)
         external
         view
         override
@@ -62,6 +62,7 @@ contract UniswapV2PairPriceFeed is AggregatorV3Interface, CarefulMath {
             uint80 answeredInRound
         )
     {
+        require(_roundId == 0, "ERR_GET_ROUND_DATA_NO_HISTORIC_ROUNDS");
         return this.latestRoundData();
     }
 
