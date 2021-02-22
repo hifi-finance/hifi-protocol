@@ -12,6 +12,7 @@ import { GodModeRedemptionPool } from "../typechain/GodModeRedemptionPool";
 import { GodModeFyToken } from "../typechain/GodModeFyToken";
 import { RedemptionPool } from "../typechain/RedemptionPool";
 import { SimplePriceFeed } from "../typechain/SimplePriceFeed";
+import { UniswapV2PairPriceFeed } from "../typechain/UniswapV2PairPriceFeed";
 
 /* Fingers-crossed that ethers.js or waffle will provide an easier way to cache the address */
 export interface Accounts {
@@ -35,6 +36,7 @@ export interface Contracts {
   redemptionPool: GodModeRedemptionPool | RedemptionPool;
   underlying: Erc20Mintable;
   underlyingPriceFeed: SimplePriceFeed;
+  uniswapV2PairPriceFeed: UniswapV2PairPriceFeed;
 }
 
 export interface Signers {
@@ -56,6 +58,7 @@ export interface Stubs {
   redemptionPool: MockContract;
   underlying: MockContract;
   underlyingPriceFeed: MockContract;
+  uniswapV2Pair: MockContract;
 }
 
 export interface Vault {

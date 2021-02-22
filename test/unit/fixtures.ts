@@ -7,6 +7,7 @@ import { Fintroller } from "../../typechain/Fintroller";
 import { GodModeBalanceSheet } from "../../typechain/GodModeBalanceSheet";
 import { GodModeFyToken } from "../../typechain/GodModeFyToken";
 import { GodModeRedemptionPool } from "../../typechain/GodModeRedemptionPool";
+import { UniswapV2PairPriceFeed } from "../../typechain/UniswapV2PairPriceFeed";
 
 import {
   deployChainlinkOperator,
@@ -14,6 +15,8 @@ import {
   deployGodModeBalanceSheet,
   deployGodModeFyToken,
   deployGodModeRedemptionPool,
+  deployUniswapV2PairPriceFeed,
+  deployUnderlyingPriceFeeds,
 } from "../deployers";
 import {
   deployStubBalanceSheet,
@@ -24,8 +27,31 @@ import {
   deployStubRedemptionPool,
   deployStubFyToken,
   deployStubUnderlying,
+  deployStubUniswapV2Pair,
 } from "./stubs";
 import { fyTokenConstants } from "../../helpers/constants";
+
+type UnitFixtureUniswapV2PairPriceFeedReturnType = {
+  uniswapV2PairPriceFeed: UniswapV2PairPriceFeed;
+  uniswapV2Pair: MockContract;
+}
+
+export async function unitFixtureUniswapV2PairPriceFeed(signers: Signer[]): Promise<UnitFixtureUniswapV2PairPriceFeedReturnType> {
+  const deployer: Signer = signers[0];
+
+  const uniswapV2Pair: MockContract = await deployStubUniswapV2Pair(deployer);
+
+  const underlyingOracles = await deployUnderlyingPriceFeeds(deployer);
+
+  const uniswapV2PairPriceFeed: UniswapV2PairPriceFeed = await deployUniswapV2PairPriceFeed(
+    deployer,
+    'WBTC-UNI/ETH',
+    uniswapV2Pair.address,
+    [underlyingOracles[0].address, underlyingOracles[1].address],
+  );
+
+  return { uniswapV2PairPriceFeed, uniswapV2Pair };
+}
 
 type UnitFixtureBalanceSheetReturnType = {
   balanceSheet: GodModeBalanceSheet;

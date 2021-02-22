@@ -12,6 +12,7 @@ import { GodModeBalanceSheet } from "../typechain/GodModeBalanceSheet";
 import { GodModeRedemptionPool } from "../typechain/GodModeRedemptionPool";
 import { GodModeFyToken } from "../typechain/GodModeFyToken";
 import { SimplePriceFeed } from "../typechain/SimplePriceFeed";
+import { UniswapV2PairPriceFeed } from "../typechain/UniswapV2PairPriceFeed";
 import { fyTokenConstants, gasLimits, prices } from "../helpers/constants";
 
 const overrideOptions: TransactionRequest = {
@@ -151,4 +152,33 @@ export async function deployUnderlyingPriceFeed(deployer: Signer): Promise<Simpl
   );
   await underlyingPriceFeed.setPrice(prices.oneDollar);
   return underlyingPriceFeed;
+}
+
+export async function deployUnderlyingPriceFeeds(deployer: Signer): Promise<SimplePriceFeed[]> {
+  const simpleEthQuotedPriceFeedArtifact: Artifact = await hre.artifacts.readArtifact("SimplePriceFeed");
+  const underlyingPriceFeeds: SimplePriceFeed[] = <SimplePriceFeed[]>[
+    await deployContract(deployer, simpleEthQuotedPriceFeedArtifact, ["WBTC/ETH"], overrideOptions),
+    await deployContract(deployer, simpleEthQuotedPriceFeedArtifact, ["UNI/ETH"], overrideOptions),
+  ];
+  await underlyingPriceFeeds[0].setPrice(prices.oneHundredDollars);
+  await underlyingPriceFeeds[1].setPrice(prices.twelveDollars);
+  return underlyingPriceFeeds;
+}
+
+export async function deployUniswapV2PairPriceFeed(
+  deployer: Signer,
+  description: string,
+  pair: string,
+  underlyingOracles: string[],
+): Promise<UniswapV2PairPriceFeed> {
+  const uniswapV2PairPriceFeedArtifact: Artifact = await hre.artifacts.readArtifact("UniswapV2PairPriceFeed");
+  const uniswapV2PairPriceFeed: UniswapV2PairPriceFeed = <UniswapV2PairPriceFeed>(
+    await deployContract(
+      deployer,
+      uniswapV2PairPriceFeedArtifact,
+      [description, pair, underlyingOracles],
+      overrideOptions,
+    )
+  );
+  return uniswapV2PairPriceFeed;
 }
