@@ -154,17 +154,6 @@ export async function deployUnderlyingPriceFeed(deployer: Signer): Promise<Simpl
   return underlyingPriceFeed;
 }
 
-export async function deployUnderlyingPriceFeeds(deployer: Signer): Promise<SimplePriceFeed[]> {
-  const simpleEthQuotedPriceFeedArtifact: Artifact = await hre.artifacts.readArtifact("SimplePriceFeed");
-  const underlyingPriceFeeds: SimplePriceFeed[] = <SimplePriceFeed[]>[
-    await deployContract(deployer, simpleEthQuotedPriceFeedArtifact, ["WBTC/ETH"], overrideOptions),
-    await deployContract(deployer, simpleEthQuotedPriceFeedArtifact, ["UNI/ETH"], overrideOptions),
-  ];
-  await underlyingPriceFeeds[0].setPrice(prices.oneHundredDollars);
-  await underlyingPriceFeeds[1].setPrice(prices.twelveDollars);
-  return underlyingPriceFeeds;
-}
-
 export async function deployUniswapV2PairPriceFeed(
   deployer: Signer,
   description: string,

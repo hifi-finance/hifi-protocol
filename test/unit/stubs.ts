@@ -61,6 +61,13 @@ export async function deployStubUniswapV2Pair(deployer: Signer): Promise<MockCon
   return uniswapV2Pair;
 }
 
+export async function deployStubPriceFeed(deployer: Signer): Promise<MockContract> {
+  const simplePriceFeedArtifact: Artifact = await hre.artifacts.readArtifact("SimplePriceFeed");
+  const collateralPriceFeed: MockContract = await deployStubContract(deployer, simplePriceFeedArtifact.abi);
+  await collateralPriceFeed.mock.decimals.returns(chainlinkPricePrecision);
+  return collateralPriceFeed;
+}
+
 export async function deployStubFintroller(deployer: Signer): Promise<MockContract> {
   const fintrollerArtifact: Artifact = await hre.artifacts.readArtifact("Fintroller");
   const fintroller: MockContract = await deployStubContract(deployer, fintrollerArtifact.abi);

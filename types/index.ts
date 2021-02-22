@@ -59,6 +59,7 @@ export interface Stubs {
   underlying: MockContract;
   underlyingPriceFeed: MockContract;
   uniswapV2Pair: MockContract;
+  underlyingOracles: MockContract[];
 }
 
 export interface Vault {
