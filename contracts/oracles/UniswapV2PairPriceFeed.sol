@@ -112,8 +112,8 @@ contract UniswapV2PairPriceFeed is AggregatorV3Interface, CarefulMath {
         (, vars.p0, , , ) = underlyingOracles[0].latestRoundData();
         (, vars.p1, , , ) = underlyingOracles[1].latestRoundData();
 
-        (vars.mathErr, vars.k) = mulUInt(vars.r0, vars.r1);
-        require(vars.mathErr == MathError.NO_ERROR, "ERR_LATEST_ROUND_DATA_MATH_ERROR");
+        /* Will never overflow since types(uint112).max * types(uint112).max can fit into a uint256 */
+        (, vars.k) = mulUInt(vars.r0, vars.r1);
 
         vars.sqrtK = Math.sqrt(vars.k);
 
