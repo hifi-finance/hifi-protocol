@@ -25,6 +25,11 @@ export enum ChainlinkOperatorErrors {
   PriceZero = "ERR_PRICE_ZERO",
 }
 
+export enum UniswapV2PairPriceFeedErrors {
+  GetRoundDataNoHistoricRounds = "ERR_GET_ROUND_DATA_NO_HISTORIC_ROUNDS",
+  LatestRoundDataMathError = "ERR_LATEST_ROUND_DATA_MATH_ERROR",
+}
+
 export enum FintrollerErrors {
   BondNotListed = "ERR_BOND_NOT_LISTED",
   ListBondFyTokenInspection = "ERR_LIST_BOND_FYTOKEN_INSPECTION",

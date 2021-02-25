@@ -118,6 +118,20 @@ export async function stubIsVaultOpen(this: Mocha.Context, fyTokenAddress: strin
   await this.stubs.balanceSheet.mock.isVaultOpen.withArgs(fyTokenAddress, account).returns(true);
 }
 
+export async function stubUniswapV2Pair(
+  this: Mocha.Context,
+  totalSupply: BigNumber,
+  reserve0: BigNumber,
+  reserve1: BigNumber,
+  price0: BigNumber,
+  price1: BigNumber,
+): Promise<void> {
+  await this.stubs.uniswapV2Pair.mock.totalSupply.returns(totalSupply);
+  await this.stubs.uniswapV2Pair.mock.getReserves.returns(reserve0, reserve1, 0);
+  await this.stubs.underlyingOracles[0].mock.latestRoundData.returns(Zero, price0, Zero, Zero, Zero);
+  await this.stubs.underlyingOracles[1].mock.latestRoundData.returns(Zero, price1, Zero, Zero, Zero);
+}
+
 export async function stubVaultFreeCollateral(
   this: Mocha.Context,
   fyTokenAddress: string,
