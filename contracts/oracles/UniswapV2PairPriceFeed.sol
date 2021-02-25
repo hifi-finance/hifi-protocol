@@ -113,7 +113,7 @@ contract UniswapV2PairPriceFeed is AggregatorV3Interface, CarefulMath {
         (, vars.p1, , , ) = underlyingOracles[1].latestRoundData();
 
         /* Will never overflow since types(uint112).max * types(uint112).max can fit into a uint256 */
-        (, vars.k) = mulUInt(vars.r0, vars.r1);
+        (, vars.k) = mulUInt(uint256(vars.r0), uint256(vars.r1));
 
         vars.sqrtK = Math.sqrt(vars.k);
 
@@ -130,6 +130,8 @@ contract UniswapV2PairPriceFeed is AggregatorV3Interface, CarefulMath {
 
         (vars.mathErr, vars.price) = divUInt(vars.dividend, vars.divisor);
         require(vars.mathErr == MathError.NO_ERROR, "ERR_LATEST_ROUND_DATA_MATH_ERROR");
+
+        assert(vars.price < uint256(type(int256).max));
 
         return int256(vars.price);
     }
