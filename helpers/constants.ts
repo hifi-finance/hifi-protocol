@@ -114,11 +114,19 @@ export const fintrollerConstants = {
 };
 
 // TODO: make the name and symbol match the expiration time
+const expirationTime = getNow().add(getDaysInSeconds(90));
+const expirationDate = new Date(expirationTime.toNumber() * 1000);
+const expirationDateFull = expirationDate.toISOString().slice(0, 10);
+const expirationDateShort = expirationDate
+  .toLocaleString("default", { month: "short", year: "2-digit" })
+  .replace(" ", "")
+  .toUpperCase();
+
 export const fyTokenConstants = {
   decimals: defaultNumberOfDecimals,
-  expirationTime: getNow().add(getDaysInSeconds(90)),
-  name: "hfyUSDC (2022-01-01)",
-  symbol: "hfyUSDC-JAN22",
+  expirationTime: expirationTime,
+  name: `hfyUSDC (${expirationDateFull})`,
+  symbol: `hfyUSDC-${expirationDateShort}`,
 };
 
 export const underlyingConstants = {
