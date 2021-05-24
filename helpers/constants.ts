@@ -1,6 +1,5 @@
 import { BigNumber } from "@ethersproject/bignumber";
 import fp from "evm-fp";
-import { One, Zero } from "@ethersproject/constants";
 
 import { getDaysInSeconds, getNow } from "./time";
 
@@ -97,9 +96,9 @@ export const defaultPrivateKeys = {
 // Contract-specific constants
 export const balanceSheetConstants = {
   defaultVault: {
-    debt: Zero,
-    freeCollateral: Zero,
-    lockedCollateral: Zero,
+    debt: fp("0"),
+    freeCollateral: fp("0"),
+    lockedCollateral: fp("0"),
     isOpen: true,
   },
 };
