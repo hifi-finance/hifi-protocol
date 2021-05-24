@@ -1,4 +1,5 @@
 import { BigNumber } from "@ethersproject/bignumber";
+import fp from "evm-fp";
 import { One, Zero } from "@ethersproject/constants";
 
 import { getDaysInSeconds, getNow } from "./time";
@@ -10,53 +11,53 @@ export const maxInt256: BigNumber = BigNumber.from(
 );
 
 // Generic amounts.
-export const ten: BigNumber = BigNumber.from(10);
-export const tenMillion: BigNumber = ten.pow(7);
-export const fiftyMillion: BigNumber = tenMillion.mul(50);
+export const ten: BigNumber = fp("1e-17");
+export const tenMillion: BigNumber = fp("0.0000001");
+export const fiftyMillion: BigNumber = fp("0.0000050");
 
 // Decimals.
-export const defaultNumberOfDecimals: BigNumber = BigNumber.from(18);
-export const chainlinkPricePrecision: BigNumber = BigNumber.from(8);
-export const chainlinkPricePrecisionScalar: BigNumber = ten.pow(defaultNumberOfDecimals.sub(chainlinkPricePrecision));
+export const defaultNumberOfDecimals: BigNumber = fp("1.8e-17");
+export const chainlinkPricePrecision: BigNumber = fp("8e-18");
+export const chainlinkPricePrecisionScalar: BigNumber = fp("1e-8");
 
 // Percentages as mantissas (decimal scalars with 18 decimals).
 export const percentages: { [name: string]: BigNumber } = {
-  oneHundred: ten.pow(18),
-  oneHundredAndTen: ten.pow(18).add(ten.pow(17)),
-  oneHundredAndTwenty: ten.pow(18).add(ten.pow(17).mul(2)),
-  oneHundredAndFifty: ten.pow(18).add(ten.pow(17).mul(5)),
-  oneHundredAndSeventyFive: ten.pow(16).mul(175),
-  oneThousand: ten.pow(19),
-  tenThousand: ten.pow(20),
+  oneHundred: fp("1"),
+  oneHundredAndTen: fp("1.1"),
+  oneHundredAndTwenty: fp("1.2"),
+  oneHundredAndFifty: fp("1.5"),
+  oneHundredAndSeventyFive: fp("1.75"),
+  oneThousand: fp("10"),
+  tenThousand: fp("100"),
 };
 
 // Ten raised to the difference between 18 and the token's decimals.
 export const precisionScalars = {
-  tokenWith6Decimals: ten.pow(12),
-  tokenWith8Decimals: ten.pow(10),
-  tokenWith18Decimals: One,
+  tokenWith6Decimals: fp("1e-6"),
+  tokenWith8Decimals: fp("1e-8"),
+  tokenWith18Decimals: fp("1e-18"),
 };
 
 // Prices with 8 decimals, as per Chainlink format.
 export const prices: { [name: string]: BigNumber } = {
-  oneDollar: ten.pow(chainlinkPricePrecision),
-  twelveDollars: ten.pow(chainlinkPricePrecision).mul(12),
-  oneHundredDollars: ten.pow(chainlinkPricePrecision).mul(100),
+  oneDollar: fp("1e-10"),
+  twelveDollars: fp("1.2e-9"),
+  oneHundredDollars: fp("1e-8"),
 };
 
 // These amounts assume that the token has 18 decimals.
 export const tokenAmounts: { [name: string]: BigNumber } = {
-  pointFiftyFive: ten.pow(17).mul(5).add(ten.pow(16).mul(5)),
-  one: ten.pow(18),
-  two: ten.pow(18).mul(2),
-  ten: ten.pow(19),
-  forty: ten.pow(19).mul(4),
-  fifty: ten.pow(19).mul(5),
-  oneHundred: ten.pow(20),
-  oneThousand: ten.pow(21),
-  tenThousand: ten.pow(22),
-  oneHundredThousand: ten.pow(23),
-  oneMillion: ten.pow(24),
+  pointFiftyFive: fp("0.55"),
+  one: fp("1"),
+  two: fp("2"),
+  ten: fp("10"),
+  forty: fp("40"),
+  fifty: fp("50"),
+  oneHundred: fp("100"),
+  oneThousand: fp("1000"),
+  tenThousand: fp("10000"),
+  oneHundredThousand: fp("100000"),
+  oneMillion: fp("1000000"),
 };
 
 // Chain ids.
