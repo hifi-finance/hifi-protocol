@@ -17,7 +17,6 @@ contract BatterseaTargetV1 is
     IBatterseaTargetV1 /// no dependency
 {
     using SafeErc20 for IErc20;
-    using SafeErc20 for IHToken;
 
     /// STORAGE PROPERTIES ///
 
@@ -32,7 +31,7 @@ contract BatterseaTargetV1 is
     /// @inheritdoc IBatterseaTargetV1
     function borrow(IHToken hToken, uint256 borrowAmount) public override {
         hToken.borrow(borrowAmount);
-        hToken.safeTransfer(msg.sender, borrowAmount);
+        hToken.transfer(msg.sender, borrowAmount);
     }
 
     /// @inheritdoc IBatterseaTargetV1
@@ -181,7 +180,7 @@ contract BatterseaTargetV1 is
         IRedemptionPool redemptionPool = hToken.redemptionPool();
 
         // Transfer the hTokens to the DSProxy.
-        hToken.safeTransferFrom(msg.sender, address(this), hTokenAmount);
+        hToken.transferFrom(msg.sender, address(this), hTokenAmount);
 
         // Redeem the hTokens.
         uint256 preUnderlyingBalance = underlying.balanceOf(address(this));
@@ -198,7 +197,7 @@ contract BatterseaTargetV1 is
     /// @inheritdoc IBatterseaTargetV1
     function repayBorrow(IHToken hToken, uint256 repayAmount) public override {
         // Transfer the hTokens to the DSProxy.
-        hToken.safeTransferFrom(msg.sender, address(this), repayAmount);
+        hToken.transferFrom(msg.sender, address(this), repayAmount);
 
         // Repay the borrow.
         hToken.repayBorrow(repayAmount);
@@ -260,7 +259,7 @@ contract BatterseaTargetV1 is
         uint256 hTokenAmount = postHTokenBalance - preHTokenBalance;
 
         // The hTokens are now in the DSProxy, so we relay them to the end user.
-        hToken.safeTransfer(msg.sender, hTokenAmount);
+        hToken.transfer(msg.sender, hTokenAmount);
     }
 
     /// @inheritdoc IBatterseaTargetV1
