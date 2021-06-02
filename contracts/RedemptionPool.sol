@@ -10,6 +10,7 @@ import "@paulrberg/contracts/utils/ReentrancyGuard.sol";
 import "./IRedemptionPool.sol";
 import "./IFintroller.sol";
 import "./IHToken.sol";
+import "./libs/Precision.sol";
 
 /// @title RedemptionPool
 /// @author Hifi
@@ -66,12 +67,7 @@ contract RedemptionPool is
         // hTokens always have 18 decimals so the underlying amount needs to be denormalized.
         // If the precision scalar is 1, it means that the underlying also has 18 decimals.
         uint256 underlyingPrecisionScalar = hToken.underlyingPrecisionScalar();
-        uint256 underlyingAmount;
-        if (underlyingPrecisionScalar != 1) {
-            underlyingAmount = hTokenAmount / underlyingPrecisionScalar;
-        } else {
-            underlyingAmount = hTokenAmount;
-        }
+        uint256 underlyingAmount = Precision.denormalize(hTokenAmount, underlyingPrecisionScalar);
 
         // Checks: there is enough liquidity.
         require(underlyingAmount <= totalUnderlyingSupply, "REDEEM_HTOKENS_INSUFFICIENT_UNDERLYING");
@@ -105,12 +101,7 @@ contract RedemptionPool is
         // hTokens always have 18 decimals so the underlying amount needs to be normalized. If the precision scalar
         // is 1, it means that the underlying has 18 decimals too.
         uint256 underlyingPrecisionScalar = hToken.underlyingPrecisionScalar();
-        uint256 hTokenAmount;
-        if (underlyingPrecisionScalar != 1) {
-            hTokenAmount = underlyingAmount * underlyingPrecisionScalar;
-        } else {
-            hTokenAmount = underlyingAmount;
-        }
+        uint256 hTokenAmount = Precision.normalize(underlyingAmount, underlyingPrecisionScalar);
 
         // Interactions: mint the hTokens.
         hToken.mint(msg.sender, hTokenAmount);

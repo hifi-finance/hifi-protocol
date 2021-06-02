@@ -10,6 +10,7 @@ import "@paulrberg/contracts/utils/ReentrancyGuard.sol";
 import "./IBalanceSheet.sol";
 import "./IFintroller.sol";
 import "./IHToken.sol";
+import "./libs/Precision.sol";
 import "./oracles/IChainlinkOperator.sol";
 
 /// @title BalanceSheet
@@ -242,12 +243,8 @@ contract BalanceSheet is
 
         // If the precision scalar is not 1, calculate the final form of the clutched collateral amount.
         uint256 collateralPrecisionScalar = hToken.collateralPrecisionScalar();
-        uint256 clutchableCollateralAmount;
-        if (collateralPrecisionScalar != 1) {
-            clutchableCollateralAmount = normalizedClutchableCollateralAmount / collateralPrecisionScalar;
-        } else {
-            clutchableCollateralAmount = normalizedClutchableCollateralAmount;
-        }
+        uint256 clutchableCollateralAmount =
+            Precision.denormalize(normalizedClutchableCollateralAmount, collateralPrecisionScalar);
 
         return clutchableCollateralAmount;
     }
@@ -283,12 +280,7 @@ contract BalanceSheet is
 
         // Normalize the collateral amount.
         uint256 collateralPrecisionScalar = hToken.collateralPrecisionScalar();
-        uint256 normalizedLockedCollateral;
-        if (collateralPrecisionScalar != 1) {
-            normalizedLockedCollateral = lockedCollateral * collateralPrecisionScalar;
-        } else {
-            normalizedLockedCollateral = lockedCollateral;
-        }
+        uint256 normalizedLockedCollateral = Precision.normalize(lockedCollateral, collateralPrecisionScalar);
 
         // Calculate the USD value of the collateral.
         uint256 lockedCollateralValueUsd = normalizedLockedCollateral.mul(normalizedCollateralPrice);

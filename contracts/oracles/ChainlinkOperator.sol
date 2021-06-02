@@ -5,6 +5,7 @@ import "@paulrberg/contracts/access/Admin.sol";
 import "@paulrberg/contracts/token/erc20/IErc20.sol";
 
 import "./IChainlinkOperator.sol";
+import "../libs/Precision.sol";
 
 /// @title ChainlinkOperator
 /// @author Hifi
@@ -46,9 +47,7 @@ contract ChainlinkOperator is
 
     /// @inheritdoc IChainlinkOperator
     function getNormalizedPrice(string memory symbol) external view override returns (uint256) {
-        uint256 price = getPrice(symbol);
-        uint256 normalizedPrice = price * pricePrecisionScalar;
-        return normalizedPrice;
+        return Precision.normalize(getPrice(symbol), pricePrecisionScalar);
     }
 
     /// @inheritdoc IChainlinkOperator
