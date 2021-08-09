@@ -1,105 +1,11 @@
-# Hifi Protocol [![Coverage Status](https://coveralls.io/repos/github/hifi-finance/hifi-protocol/badge.svg?branch=main)](https://coveralls.io/github/hifi-finance/hifi-protocol?branch=main) [![Commitizen Friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/) [![License: LGPL3.0](https://img.shields.io/badge/license-LGPL3.0-yellow.svg)](https://opensource.org/licenses/lgpl-3.0)
+# Hifi Protocol has been merged into the [Hifi Monorepo](https://github.com/hifi-finance/hifi)
 
-An implementation of zero-coupon bonds on the Ethereum blockchain. In-depth documentation on Hifi is available at [docs.hifi.finance](https://docs.hifi.finance).
+You can find the latest version of the source code in the
+[hifi-finance/hifi](https://github.com/hifi-finance/hifi) repository, where it will continue to
+be developed.
 
-The built contract artifacts can be browsed via [unpkg.com](https://unpkg.com/browse/@hifi/protocol@latest/).
+Please report any bugs to the Hifi Monorepo [issue tracker](https://github.com/hifi-finance/hifi/issues).
 
-## Developers
+The approach we used to merge this repository into a monorepo is described in [this article](https://www.adaltas.com/en/2021/05/21/js-monorepos-merging-git-repositories/).
 
-The contracts are written in Solidity and the tests in TypeScript. If you want to contribute, familiarity with Hardhat,
-Ethers and Waffle is requisite.
-
-### Pre Requisites
-
-Before running any command, make sure to install dependencies:
-
-```sh
-$ yarn install
-```
-
-### Compile
-
-Compile the smart contracts with Hardhat:
-
-```sh
-$ yarn compile
-```
-
-### TypeChain
-
-Compile the smart contracts and generate TypeChain artifacts:
-
-```sh
-$ yarn typechain
-```
-
-### Lint Solidity
-
-Lint the Solidity code:
-
-```sh
-$ yarn lint:sol
-```
-
-### Lint TypeScript
-
-Lint the TypeScript code:
-
-```sh
-$ yarn lint:ts
-```
-
-### Format Code
-
-Run the Prettier formatter:
-
-```sh
-$ yarn prettier
-```
-
-### Test Unit
-
-Run the unit tests:
-
-```sh
-$ yarn test:unit
-```
-
-### Test Integration
-
-Run the integration tests:
-
-```sh
-$ yarn test:integration
-```
-
-### Coverage
-
-Generate the code coverage report:
-
-```sh
-$ yarn coverage
-```
-
-### Clean
-
-Delete the smart contract artifacts, the coverage reports and the Hardhat cache:
-
-```sh
-$ yarn clean
-```
-
-## Acknowledgements
-
-- Dan Robinson and Allan Niemerg, for their work on [The Yield Protocol: On-Chain Lending With Interest Rate
-  Discovery](https://research.paradigm.xyz/Yield.pdf), which shaped many of our protocol design choices.
-- Chainlink, for their [Price Feeds](https://docs.chain.link/docs/using-chainlink-reference-contracts).
-- OpenZeppelin, for their outstanding [upgradeable contracts library](https://github.com/OpenZeppelin/openzeppelin-contracts/tree/master/contracts).
-
-## Discussion
-
-For any concerns or feedback, open an issue or visit us on [Discord](https://discord.gg/mhtSRz6) to discuss.
-
-## License
-
-Everything is released under the [LGPL3.0 license](./LICENSE.md).
+An archive of the source code before the merge is available [here](../../tree/archive).
